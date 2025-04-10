@@ -19,9 +19,10 @@ Główne funkcje produktu obejmują:
 
 Technologia:
 
-- Frontend: Next.js z interfejsem opartym na bibliotece Tailwind
-- Backend: Nest.js
+- Frontend: Next.js z interfejsem opartym na bibliotece Tailwind i komponentach HeroUI
+- Backend: Supabase jako Backend-as-a-Service
 - Baza danych: PostgreSQL
+- Testy: Playwright (e2e) i Vitest (unit)
 - Język aplikacji: polski
 
 ## 2. Problem użytkownika
@@ -304,7 +305,8 @@ Kryteria akceptacji:
 
 ### 6.3 Metryki techniczne
 
-- Poprawne działanie testów e2e bez błędów timeout
+- Poprawne działanie testów e2e (Playwright) bez błędów timeout
+- Pomyślne przejście wszystkich testów jednostkowych (Vitest)
 - Czas odpowiedzi API poniżej 1 sekundy
 - Dostępność systemu na poziomie 99.9%
 
