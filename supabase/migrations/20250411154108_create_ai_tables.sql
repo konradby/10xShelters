@@ -7,7 +7,7 @@ create table ai_searches (
   created_at timestamp with time zone default now() not null,
   user_id uuid references profiles(id) on delete set null,
   prompt text not null,
-  search_vector tsvector generated always as (to_tsvector('polish', prompt)) stored
+  search_vector tsvector generated always as (to_tsvector('simple', prompt)) stored
 );
 
 -- włączenie row level security
