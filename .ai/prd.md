@@ -22,6 +22,7 @@ Technologia:
 - Frontend: Next.js z interfejsem opartym na bibliotece Tailwind i komponentach HeroUI
 - Backend: Supabase jako Backend-as-a-Service
 - Baza danych: PostgreSQL
+- Zarządzanie pakietami: Yarn
 - Testy: Playwright (e2e) i Vitest (unit)
 - Język aplikacji: polski
 

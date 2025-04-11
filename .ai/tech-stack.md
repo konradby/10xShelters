@@ -4,6 +4,7 @@ Frontend - Next.js z HeroUI dla komponentów interaktywnych:
 - TypeScript 5 dla statycznego typowania kodu i lepszego wsparcia IDE
 - Tailwind 4 pozwala na wygodne stylowanie aplikacji
 - HeroUI (dawniej NextUI) zapewnia bibliotekę dostępnych komponentów dla Next.js, na których oprzemy UI
+- Yarn jako menedżer pakietów zapewniający spójne i niezawodne zarządzanie zależnościami
 
 Backend - Supabase jako kompleksowe rozwiązanie backendowe:
 
