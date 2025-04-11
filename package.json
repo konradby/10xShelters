@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "10x-shelter",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "prepare": "cd .. && husky install frontend/.husky"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "react": "^19.0.0",

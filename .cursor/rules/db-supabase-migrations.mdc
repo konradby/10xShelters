@@ -1,0 +1,122 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: supabase/migrations/*.sql
+alwaysApply: false
+---
+# Database: Supabase Migrations for 10xShelter
+
+You are a Postgres Expert who loves creating secure database schemas for animal shelter applications.
+
+This project uses the migrations provided by the Supabase CLI to manage the PostgreSQL database.
+
+## Creating a migration file
+
+Given the context of the user's message, create a database migration file inside the folder `supabase/migrations/`.
+
+The file MUST follow this naming convention:
+
+The file MUST be named in the format `YYYYMMDDHHmmss_short_description.sql` with proper casing for months, minutes, and seconds in UTC time:
+
+1. `YYYY` - Four digits for the year (e.g., `2024`).
+2. `MM` - Two digits for the month (01 to 12).
+3. `DD` - Two digits for the day of the month (01 to 31).
+4. `HH` - Two digits for the hour in 24-hour format (00 to 23).
+5. `mm` - Two digits for the minute (00 to 59).
+6. `ss` - Two digits for the second (00 to 59).
+7. Add an appropriate description for the migration.
+
+For example:
+
+```
+20240906123045_create_shelters_table.sql
+20240906124530_create_dogs_table.sql
+```
+
+## SQL Guidelines for 10xShelter
+
+Write Postgres-compatible SQL code for Supabase migration files that:
+
+- Includes a header comment with metadata about the migration, such as the purpose, affected tables/columns, and any special considerations.
+- Includes thorough comments explaining the purpose and expected behavior of each migration step.
+- Write all SQL in lowercase.
+- Add copious comments for any destructive SQL commands, including truncating, dropping, or column alterations.
+- When creating a new table, you MUST enable Row Level Security (RLS) even if the table is intended for public access.
+- Use appropriate data types for the 10xShelter domain:
+  - `text` for names, descriptions, and other string data
+  - `uuid` for primary keys and foreign keys
+  - `timestamp with time zone` for timestamps
+  - `jsonb` for complex data structures
+  - Appropriate enums for status fields (e.g., dog adoption status)
+
+## Row Level Security Policies
+
+When creating RLS Policies:
+
+- Ensure the policies cover all relevant access scenarios (e.g. select, insert, update, delete) based on the table's purpose and data sensitivity.
+- If the table is intended for public access (e.g., publicly viewable dog profiles), the policy can simply return `true` for `select` operations.
+- RLS Policies should be granular: one policy for each operation (`select`, `insert`, `update`, `delete`) and for each Supabase role (`anon` and `authenticated`). DO NOT combine Policies even if the functionality is the same for both roles.
+- Include comments explaining the rationale and intended behavior of each security policy.
+
+### Example RLS Policies for 10xShelter
+
+For the `shelters` table:
+```sql
+-- Allow anyone to view shelter information
+create policy "Public shelters are viewable by everyone" 
+on shelters for select using (true);
+
+-- Only authenticated shelter employees can insert new shelters
+create policy "Shelter employees can insert shelters" 
+on shelters for insert with check (auth.role() = 'authenticated');
+
+-- Only authenticated shelter employees assigned to a shelter can update it
+create policy "Shelter employees can update their own shelters" 
+on shelters for update using (
+  auth.role() = 'authenticated' and 
+  auth.uid() in (
+    select user_id from shelter_employees where shelter_id = id
+  )
+);
+```
+
+For the `dogs` table:
+```sql
+-- Allow anyone to view available dogs
+create policy "Public dogs are viewable by everyone" 
+on dogs for select using (true);
+
+-- Only authenticated shelter employees can insert new dogs
+create policy "Shelter employees can insert dogs" 
+on dogs for insert with check (
+  auth.role() = 'authenticated' and 
+  auth.uid() in (
+    select user_id from shelter_employees where shelter_id = shelter_id
+  )
+);
+
+-- Only authenticated shelter employees from the same shelter can update dogs
+create policy "Shelter employees can update dogs in their shelter" 
+on dogs for update using (
+  auth.role() = 'authenticated' and 
+  auth.uid() in (
+    select user_id from shelter_employees where shelter_id = shelter_id
+  )
+);
+```
+
+## Schema Guidelines for 10xShelter
+
+The 10xShelter application should have tables for at least:
+
+1. `users` - Managed by Supabase Auth, contains shelter employee information
+2. `shelters` - Information about animal shelters
+3. `dogs` - Information about dogs available for adoption
+4. `shelter_employees` - Junction table connecting users to shelters
+5. `dog_attributes` - Characteristics and attributes of dogs (temperament, size, etc.)
+
+The generated SQL code should be production-ready, well-documented, and aligned with Supabase's best practices while supporting the core functionality of the 10xShelter application. 
