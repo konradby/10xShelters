@@ -25,4 +25,4 @@ INSERT INTO profiles (
 ('77777777-7777-7777-7777-777777777777', 'user', 'Michał Szymański', '+48 777 888 999', 'michal.szymanski@example.com', 'https://example.com/avatars/michal.jpg', NOW(), NOW()),
 ('88888888-8888-8888-8888-888888888888', 'user', 'Agnieszka Woźniak', '+48 222 333 444', 'agnieszka.wozniak@example.com', 'https://example.com/avatars/agnieszka.jpg', NOW(), NOW()),
 ('99999999-9999-9999-9999-999999999999', 'user', 'Paweł Dąbrowski', '+48 666 777 888', 'pawel.dabrowski@example.com', 'https://example.com/avatars/pawel.jpg', NOW(), NOW()),
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user', 'Magdalena Kozłowska', '+48 999 000 111', 'magdalena.kozlowska@example.com', 'https://example.com/avatars/magdalena.jpg', NOW(), NOW()); 
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user', 'Magdalena Kozłowska', '+48 999 000 111', 'magdalena.kozłowska@example.com', 'https://example.com/avatars/magdalena.jpg', NOW(), NOW()); 

@@ -3,6 +3,9 @@
 -- Data: 2024-04-12
 -- Opis: Dodanie przykładowych psów z pełnymi danymi
 
+-- Najpierw czyścimy tabelę
+TRUNCATE TABLE dogs CASCADE;
+
 INSERT INTO dogs (
   id,
   name,
