@@ -13,9 +13,9 @@ export const AIPromptInput = () => {
   };
 
   return (
-    <section className="py-12 bg-primary-50 rounded-xl shadow-lg border border-primary-200">
+    <section className="py-12 bg-[#F5F7F2] rounded-3xl shadow-lg border border-[#D1DBC8]">
       <div className="max-w-2xl mx-auto px-6">
-        <h2 className="text-2xl font-bold text-primary-800 mb-6 text-center">
+        <h2 className="text-2xl font-bold text-[#2C4A27] mb-6 text-center">
           Opisz swojego idealnego psa
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -29,27 +29,27 @@ export const AIPromptInput = () => {
             maxRows={8}
             isInvalid={!!error}
             errorMessage={error}
-            className="w-full bg-white shadow-md border-2 border-primary-300 focus:border-primary-500"
+            className="w-full bg-white shadow-sm border-2 border-[#A7C4A0] focus:border-[#4A6741]"
             size="lg"
           />
           <div className="flex justify-center">
             <Button
               type="submit"
-              color="primary"
+              color="success"
               isLoading={isLoading}
               isDisabled={prompt.length < 10 || prompt.length > 1000}
-              className="text-lg font-bold py-6 px-8 text-white bg-primary-600 hover:bg-primary-700 shadow-md"
+              className="text-lg font-bold py-6 px-8 text-white bg-[#4A6741] hover:bg-[#2C4A27] shadow-md rounded-xl"
               size="lg"
             >
               {isLoading ? 'Szukam...' : 'Znajdź idealnego psa'}
             </Button>
           </div>
         </form>
-        <div className="mt-6 p-4 bg-white rounded-lg border border-primary-200 shadow-sm">
-          <p className="font-medium text-primary-800">
+        <div className="mt-6 p-6 bg-white rounded-2xl border border-[#D1DBC8] shadow-sm">
+          <p className="font-medium text-[#2C4A27]">
             Podpowiedź: Opisz jak najdokładniej:
           </p>
-          <ul className="list-disc list-inside mt-2 text-gray-700 space-y-1">
+          <ul className="list-disc list-inside mt-2 text-[#4A6741] space-y-2">
             <li>Twój styl życia i aktywności</li>
             <li>Miejsce zamieszkania i warunki</li>
             <li>Oczekiwania wobec psa</li>
