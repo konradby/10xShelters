@@ -12,11 +12,11 @@ export const StatisticsSection = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py2">
         {[...Array(3)].map((_, i) => (
           <div key={i} className="animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/4 mb-2" />
-            <div className="h-8 bg-gray-200 rounded w-1/2" />
+            <div className="h-4 bg-[#D1DBC8] rounded-lg w-1/4 mb-2" />
+            <div className="h-8 bg-[#D1DBC8] rounded-lg w-1/2" />
           </div>
         ))}
       </div>
@@ -24,34 +24,38 @@ export const StatisticsSection = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-12">
-      <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
-        <CardBody className="text-center p-6">
-          <div>
-            <div className="text-4xl font-bold text-primary-600 mb-2">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+      <Card className="bg-white border border-[#D1DBC8] shadow-md hover:shadow-lg transition-all duration-300 rounded-3xl overflow-hidden">
+        <CardBody className="text-center p-8">
+          <div className="flex flex-col items-center justify-center">
+            <div className="text-5xl font-bold text-[#4A6741] mb-3">
               {stats.sheltersCount}
             </div>
-            <div className="text-gray-800 font-medium">Schronisk</div>
+            <div className="text-[#2C4A27] font-medium text-lg">Schronisk</div>
           </div>
         </CardBody>
       </Card>
-      <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
-        <CardBody className="text-center p-6">
-          <div>
-            <div className="text-4xl font-bold text-primary-600 mb-2">
+
+      <Card className="bg-white border border-[#D1DBC8] shadow-md hover:shadow-lg transition-all duration-300 rounded-3xl overflow-hidden">
+        <CardBody className="text-center p-8">
+          <div className="flex flex-col items-center justify-center">
+            <div className="text-5xl font-bold text-[#4A6741] mb-3">
               {stats.availableDogsCount}
             </div>
-            <div className="text-gray-800 font-medium">Psów do adopcji</div>
+            <div className="text-[#2C4A27] font-medium text-lg">
+              Psów do adopcji
+            </div>
           </div>
         </CardBody>
       </Card>
-      <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
-        <CardBody className="text-center p-6">
-          <div>
-            <div className="text-4xl font-bold text-primary-600 mb-2">
+
+      <Card className="bg-white border border-[#D1DBC8] shadow-md hover:shadow-lg transition-all duration-300 rounded-3xl overflow-hidden">
+        <CardBody className="text-center p-8">
+          <div className="flex flex-col items-center justify-center">
+            <div className="text-5xl font-bold text-[#4A6741] mb-3">
               {stats.adoptedDogsCount}
             </div>
-            <div className="text-gray-800 font-medium">
+            <div className="text-[#2C4A27] font-medium text-lg">
               Szczęśliwych adopcji
             </div>
           </div>
