@@ -39,7 +39,7 @@ export const StatisticsSection = () => {
         <CardBody className="text-center p-6">
           <div>
             <div className="text-4xl font-bold text-primary-600 mb-2">
-              {stats.dogsCount}
+              {stats.availableDogsCount}
             </div>
             <div className="text-gray-800 font-medium">Psów do adopcji</div>
           </div>
@@ -49,7 +49,7 @@ export const StatisticsSection = () => {
         <CardBody className="text-center p-6">
           <div>
             <div className="text-4xl font-bold text-primary-600 mb-2">
-              {stats.adoptionsCount}
+              {stats.adoptedDogsCount}
             </div>
             <div className="text-gray-800 font-medium">
               Szczęśliwych adopcji

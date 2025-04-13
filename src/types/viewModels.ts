@@ -15,6 +15,9 @@ export type StatsViewModel = {
   sheltersCount: number;
   dogsCount: number;
   adoptionsCount: number;
+  availableDogsCount: number;
+  adoptedDogsCount: number;
+  sheltersByCity: Record<string, number>;
 };
 
 // Model statusu uwierzytelniania

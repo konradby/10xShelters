@@ -8,6 +8,9 @@ export const useStats = () => {
     sheltersCount: 0,
     dogsCount: 0,
     adoptionsCount: 0,
+    availableDogsCount: 0,
+    adoptedDogsCount: 0,
+    sheltersByCity: {},
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +36,10 @@ export const useStats = () => {
         setStats({
           sheltersCount: data.sheltersCount,
           dogsCount: data.dogsCount,
-          adoptionsCount: data.adoptionsCount,
+          adoptionsCount: data.adoptedDogsCount,
+          availableDogsCount: data.availableDogsCount,
+          adoptedDogsCount: data.adoptedDogsCount,
+          sheltersByCity: data.sheltersByCity,
         });
       } catch (e) {
         console.error('Error fetching stats:', e);
