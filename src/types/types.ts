@@ -1,8 +1,8 @@
 // Typy pomocnicze
-type UUID = string;
-type Email = string;
-type Phone = string;
-type PostalCode = string;
+export type UUID = string;
+export type Email = string;
+export type Phone = string;
+export type PostalCode = string;
 
 // Typy wyliczeniowe
 export const OUserRole = {
