@@ -2,12 +2,12 @@
 
 ## 1. Przegląd punktu końcowego
 
-Endpoint `/ai/match` służy do wyszukiwania psów za pomocą sztucznej inteligencji na podstawie opisu preferencji użytkownika. System analizuje prompt użytkownika i zwraca listę psów najlepiej pasujących do podanych kryteriów, wraz z procentowym dopasowaniem.
+Endpoint `/public/match-dogs` służy do wyszukiwania psów za pomocą sztucznej inteligencji na podstawie opisu preferencji użytkownika. System analizuje prompt użytkownika i zwraca listę psów najlepiej pasujących do podanych kryteriów, wraz z procentowym dopasowaniem.
 
 ## 2. Szczegóły żądania
 
 - Metoda HTTP: POST
-- Struktura URL: `/api/ai/match`
+- Struktura URL: `/api/public/match-dogs`
 - Parametry:
   - Wymagane:
     - prompt (string): Opis preferencji użytkownika (min. 10 znaków)
@@ -107,7 +107,7 @@ type AIMatchResponseDTO = {
    - Obsługa błędów i retry mechanizmu
    - Cache'owanie odpowiedzi
 
-2. Implementacja endpointu (`src/app/api/ai/match/route.ts`)
+2. Implementacja endpointu (`src/app/api/public/match-dogs/route.ts`)
 
    - Walidacja żądania
    - Obsługa autoryzacji

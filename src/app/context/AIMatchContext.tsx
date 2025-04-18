@@ -109,10 +109,10 @@ export function AIMatchProvider({ children }: { children: ReactNode }) {
 // Hook do używania kontekstu
 export function useAIMatch(): AIMatchContextType {
   const context = useContext(AIMatchContext);
-  
+
   if (!context) {
     throw new Error('useAIMatch must be used within an AIMatchProvider');
   }
-  
+
   return context;
 }

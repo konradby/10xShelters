@@ -2,8 +2,10 @@ import { type NextRequest } from 'next/server';
 import { updateSession } from '@/utils/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
-  // Sprawdź, czy ścieżka zaczyna się od /api/public/ i pomiń uwierzytelnianie
-  if (request.nextUrl.pathname.startsWith('/api/public/')) {
+  if (
+    request.nextUrl.pathname === '/' ||
+    request.nextUrl.pathname.startsWith('/api/public/')
+  ) {
     return;
   }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useAIMatch } from '@/hooks/useAIMatch';
+import { useAIMatch } from '@/app/context/AIMatchContext';
 import { Button, Progress } from '@heroui/react';
 import { useEffect, useState } from 'react';
 
@@ -23,7 +23,7 @@ export const AIPromptInput = () => {
     if (validationErrors) {
       setValidationErrors(null);
     }
-  }, [prompt, setPrompt]);
+  }, [prompt, setPrompt, validationErrors]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,16 +72,20 @@ export const AIPromptInput = () => {
               name="prompt"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              disabled={isLoading}
               rows={6}
               className={`w-full p-4 text-base bg-white border-2 rounded-2xl text-black
                 ${validationErrors ? 'border-red-500' : 'border-[#A7C4A0]'} 
-                focus:outline-none focus:border-[#4A6741]`}
+                focus:outline-none focus:border-[#4A6741]
+                disabled:bg-gray-100 disabled:opacity-75`}
               aria-invalid={!!validationErrors}
             />
 
             {validationErrors && (
               <p className="text-red-500 text-sm mt-1">{validationErrors}</p>
             )}
+
+            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
             <div className="flex justify-between items-center mt-4 bg-[#F5F7F2] p-3 rounded-xl border border-[#D1DBC8]">
               <Progress
@@ -106,15 +110,18 @@ export const AIPromptInput = () => {
               color="success"
               isLoading={isLoading}
               isDisabled={isLoading}
+              spinner={
+                <div className="h-5 w-5 border-2 border-t-transparent border-white rounded-full animate-spin" />
+              }
               className="text-lg font-bold py-6 px-8 text-white bg-[#4A6741] hover:bg-[#2C4A27] shadow-md rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               size="lg"
             >
-              {isLoading ? 'Szukam...' : 'Znajdź idealnego psa'}
+              {isLoading ? 'Szukam pasujących psów...' : 'Znajdź idealnego psa'}
             </Button>
           </div>
         </form>
 
-        {showTips && (
+        {showTips && !isLoading && (
           <div className="px-6 md:px-8 pb-8">
             <div className="p-6 bg-[#F5F7F2] rounded-2xl border border-[#D1DBC8]">
               <p className="font-medium text-[#2C4A27]">

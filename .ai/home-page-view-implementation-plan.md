@@ -216,7 +216,7 @@ export const useAIMatch = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/ai/match', {
+      const response = await fetch('/api/public/match-dogs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -386,7 +386,7 @@ export const useAuth = () => {
 ### Endpoint dopasowania AI
 
 - **Metoda**: POST
-- **Ścieżka**: `/api/ai/match`
+- **Ścieżka**: `/api/public/match-dogs`
 - **Request Body**:
   ```typescript
   {

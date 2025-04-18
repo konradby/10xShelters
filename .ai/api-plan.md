@@ -319,7 +319,7 @@
 #### Match Dogs
 
 - Method: POST
-- Path: `/ai/match`
+- Path: `/public/match-dogs`
 - Description: Wyszukiwanie psów przez AI
 - Request Body:
 
