@@ -51,7 +51,7 @@ export const DogResultsGrid = () => {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="h-80 bg-[#E8EFDE] rounded-lg animate-pulse border border-[#D1DBC8]"
+                className="h-80 bg-[#E8EFDE] rounded-xl animate-pulse border border-[#D1DBC8]"
                 style={{ animationDelay: `${i * 0.1}s` }}
               />
             ))}
@@ -65,11 +65,11 @@ export const DogResultsGrid = () => {
     return (
       <section className="py-8">
         <div className="container mx-auto px-4">
-          <div className="text-center py-12 bg-primary-50 rounded-lg shadow-sm border border-primary-200">
+          <div className="text-center py-12 bg-primary-50 rounded-xl shadow-sm border border-primary-200">
             <p className="text-red-500 mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="text-primary-600 hover:text-primary-800 hover:underline"
+              className="text-primary-600 hover:text-primary-800 hover:underline rounded-lg px-4 py-2"
             >
               Spróbuj ponownie
             </button>
@@ -83,7 +83,7 @@ export const DogResultsGrid = () => {
     return (
       <section className="py-8">
         <div className="container mx-auto px-4">
-          <div className="text-center py-12 bg-primary-50 rounded-lg shadow-sm border border-primary-200">
+          <div className="text-center py-12 bg-primary-50 rounded-xl shadow-sm border border-primary-200">
             <p className="text-[#4A6741]">
               Nie znaleziono psów pasujących do Twoich kryteriów. Spróbuj
               zmienić opis.

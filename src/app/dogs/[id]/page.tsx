@@ -172,7 +172,7 @@ export default async function DogPage({ params }: Props) {
   return (
     <MainLayout>
       {/* Hero Section z informacjami o psie */}
-      <section className="relative min-h-[50vh] w-full overflow-hidden">
+      <section className="relative min-h-[50vh] w-full overflow-hidden rounded-b-xl">
         {/* Zdjęcie w tle */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -200,7 +200,7 @@ export default async function DogPage({ params }: Props) {
         </div>
       </section>
 
-      <div className="bg-[#F7F9F4] py-12">
+      <div className="bg-[#F7F9F4] py-12 rounded-t-xl">
         <div className="container mx-auto px-4">
           <DogDetails dog={dogData} />
         </div>

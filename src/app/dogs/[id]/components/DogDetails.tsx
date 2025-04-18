@@ -86,7 +86,7 @@ export function DogDetails({ dog }: DogDetailsProps) {
                 {dog.images.map((image) => (
                   <div
                     key={image.id}
-                    className={`w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 ${
+                    className={`w-20 h-20 rounded-xl overflow-hidden cursor-pointer border-2 ${
                       selectedImage === image.url
                         ? 'border-[#4A6741] shadow-md'
                         : 'border-transparent'
@@ -112,7 +112,7 @@ export function DogDetails({ dog }: DogDetailsProps) {
           <div className="w-full md:w-1/2">
             <Card className="border border-[#D1DBC8] shadow-md rounded-xl overflow-hidden">
               <CardHeader className="flex flex-col gap-2 bg-[#E8EFDE] p-6">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-center gap-2">
                   <h1 className="text-3xl font-bold text-[#2C4A27]">
                     {dog.name}
                   </h1>
@@ -121,9 +121,9 @@ export function DogDetails({ dog }: DogDetailsProps) {
                       dog.status === 'available'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-gray-100 text-gray-800'
-                    }`}
+                    } rounded-lg`}
                   >
-                    {dog.status === 'available' ? 'Dostępny' : 'Zaadoptowany'}
+                    {dog.status === 'available' ? 'dostępny' : 'zaadoptowany'}
                   </Chip>
                 </div>
                 <p className="text-lg text-[#4A6741]">
@@ -133,7 +133,7 @@ export function DogDetails({ dog }: DogDetailsProps) {
                   {dog.tags.map((tag) => (
                     <Chip
                       key={tag.id}
-                      className="bg-[#D1DBC8] text-[#4A6741]"
+                      className="bg-[#D1DBC8] text-[#4A6741] rounded-lg"
                       size="sm"
                     >
                       {tag.name}
@@ -144,7 +144,7 @@ export function DogDetails({ dog }: DogDetailsProps) {
 
               <CardBody className="p-6">
                 <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4 bg-[#F7F9F4] p-4 rounded-lg">
+                  <div className="grid grid-cols-2 gap-4 bg-[#F7F9F4] p-4 rounded-xl">
                     {dog.approximate_age && (
                       <div>
                         <p className="text-sm text-gray-500 font-medium">
@@ -198,7 +198,7 @@ export function DogDetails({ dog }: DogDetailsProps) {
                   </div>
 
                   {dog.description && (
-                    <div className="bg-white p-4 rounded-lg border border-[#D1DBC8]">
+                    <div className="bg-white p-4 rounded-xl border border-[#D1DBC8]">
                       <h3 className="text-xl font-semibold text-[#2C4A27] mb-2">
                         O {dog.name}
                       </h3>
@@ -207,7 +207,7 @@ export function DogDetails({ dog }: DogDetailsProps) {
                   )}
 
                   {dog.breed.description && (
-                    <div className="bg-white p-4 rounded-lg border border-[#D1DBC8]">
+                    <div className="bg-white p-4 rounded-xl border border-[#D1DBC8]">
                       <h3 className="text-xl font-semibold text-[#2C4A27] mb-2">
                         O rasie {dog.breed.name}
                       </h3>
@@ -216,7 +216,7 @@ export function DogDetails({ dog }: DogDetailsProps) {
                   )}
 
                   {dog.shelter && (
-                    <div className="bg-[#F7F9F4] p-4 rounded-lg">
+                    <div className="bg-[#F7F9F4] p-4 rounded-xl">
                       <h3 className="text-xl font-semibold text-[#2C4A27] mb-2">
                         Schronisko
                       </h3>
@@ -242,7 +242,7 @@ export function DogDetails({ dog }: DogDetailsProps) {
                     <div className="pt-4">
                       <Link href={`/adoption-form?dogId=${dog.id}`}>
                         <Button
-                          className="w-full bg-[#4A6741] text-white hover:bg-[#2C4A27] shadow-md"
+                          className="w-full bg-[#4A6741] text-white hover:bg-[#2C4A27] shadow-md rounded-xl"
                           size="lg"
                         >
                           Rozpocznij proces adopcji
@@ -260,7 +260,7 @@ export function DogDetails({ dog }: DogDetailsProps) {
       <div className="mt-4 mb-6 flex justify-center">
         <Link href="/">
           <Button
-            className="bg-white text-[#4A6741] border-[#4A6741] hover:bg-[#E8EFDE] shadow-sm"
+            className="bg-white text-[#4A6741] border-[#4A6741] hover:bg-[#E8EFDE] shadow-sm rounded-xl"
             variant="bordered"
           >
             ← Wróć do listy psów

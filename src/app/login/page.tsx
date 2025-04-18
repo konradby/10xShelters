@@ -6,14 +6,16 @@ import { useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-[#F5F7F2]">
+      <Card className="w-full max-w-md border-none shadow-lg rounded-xl">
         <CardBody className="p-6">
-          <h1 className="text-2xl font-bold mb-6 text-center">Logowanie</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center text-[#2C4A27]">
+            Logowanie
+          </h1>
 
           <form className="space-y-4">
             <div>
-              <label htmlFor="email" className="block mb-1">
+              <label htmlFor="email" className="block mb-1 text-[#2C4A27]">
                 Email:
               </label>
               <Input
@@ -22,11 +24,12 @@ export default function LoginPage() {
                 type="email"
                 placeholder="twoj@email.pl"
                 required
+                className="rounded-lg"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block mb-1">
+              <label htmlFor="password" className="block mb-1 text-[#2C4A27]">
                 Hasło:
               </label>
               <Input
@@ -35,19 +38,22 @@ export default function LoginPage() {
                 type="password"
                 placeholder="********"
                 required
+                className="rounded-lg"
               />
             </div>
 
             <div className="flex flex-col gap-2 mt-6">
-              <Button formAction={login} color="primary" className="w-full">
+              <Button
+                formAction={login}
+                className="w-full bg-[#2C4A27] text-white hover:bg-[#3C5A37] rounded-lg"
+              >
                 Zaloguj się
               </Button>
 
               <Button
                 formAction={signup}
-                color="secondary"
+                className="w-full bg-[#A7C4A0] text-[#2C4A27] hover:bg-[#8BAD84] rounded-lg"
                 variant="flat"
-                className="w-full"
               >
                 Zarejestruj się
               </Button>
@@ -71,7 +77,7 @@ function MessageDisplay() {
   return (
     <>
       {error && <p className="text-red-500">{error}</p>}
-      {message && <p className="text-green-500">{message}</p>}
+      {message && <p className="text-[#2C4A27]">{message}</p>}
     </>
   );
 }
