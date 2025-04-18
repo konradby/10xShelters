@@ -29,7 +29,7 @@ export class AIService {
           'X-Title': '10xShelter',
         },
         body: JSON.stringify({
-          model: 'anthropic/claude-3-opus',
+          model: 'deepseek/deepseek-v3-base:free',
           messages: [
             {
               role: 'system',

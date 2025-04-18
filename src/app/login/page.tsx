@@ -1,3 +1,5 @@
+'use client';
+
 import { login, signup } from './actions';
 import { Card, CardBody, Button, Input } from '@heroui/react';
 import { useSearchParams } from 'next/navigation';
@@ -62,7 +64,6 @@ export default function LoginPage() {
 }
 
 function MessageDisplay() {
-  'use client';
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
   const message = searchParams.get('message');

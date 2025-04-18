@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         name,
         size
       ),
-      primary_image
+      primary_image_path
     `
     )
     .in(
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
             name: breedInfo.name,
             size: breedInfo.size,
           },
-          primary_image: dog.primary_image,
+          primary_image: dog.primary_image_path,
         },
       };
     }),

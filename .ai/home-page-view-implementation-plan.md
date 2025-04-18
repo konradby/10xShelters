@@ -279,7 +279,7 @@ export const useStats = () => {
     const fetchStats = async () => {
       try {
         // Zakładamy, że istnieje endpoint /api/stats
-        const response = await fetch('/api/stats');
+        const response = await fetch('/api/public/stats');
 
         if (!response.ok) {
           throw new Error(`Status ${response.status}`);

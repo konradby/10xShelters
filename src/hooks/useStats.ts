@@ -18,7 +18,7 @@ export const useStats = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/stats');
+        const response = await fetch('/api/public/stats');
 
         if (!response.ok) {
           const errorData = await response.json();
