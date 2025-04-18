@@ -7,24 +7,28 @@ import { useState, useEffect } from 'react';
 
 export const DogResultsGrid = () => {
   const { results, isLoading, error } = useAIMatch();
-  const [sortedResults, setSortedResults] = useState(results);
   const [sortOrder, setSortOrder] = useState('match-desc');
+
+  // Inicjalizujemy sortedResults bezpośrednio z results i sortOrder,
+  // zamiast używać pustej tablicy (co powoduje różnicę między serwerem a klientem)
+  const getSortedResults = () => {
+    if (!results || results.length === 0) return [];
+
+    return [...results].sort((a, b) => {
+      if (sortOrder === 'match-desc') {
+        return b.matchPercentage - a.matchPercentage;
+      } else if (sortOrder === 'match-asc') {
+        return a.matchPercentage - b.matchPercentage;
+      }
+      return 0;
+    });
+  };
+
+  const [sortedResults, setSortedResults] = useState(getSortedResults());
 
   // Aktualizuj posortowane wyniki, gdy zmienią się oryginalne wyniki lub sortowanie
   useEffect(() => {
-    if (results && results.length > 0) {
-      const sorted = [...results].sort((a, b) => {
-        if (sortOrder === 'match-desc') {
-          return b.matchPercentage - a.matchPercentage;
-        } else if (sortOrder === 'match-asc') {
-          return a.matchPercentage - b.matchPercentage;
-        }
-        return 0;
-      });
-      setSortedResults(sorted);
-    } else {
-      setSortedResults([]);
-    }
+    setSortedResults(getSortedResults());
   }, [results, sortOrder]);
 
   const handleSortChange = (value: string) => {
@@ -32,7 +36,7 @@ export const DogResultsGrid = () => {
   };
 
   // Brak wyników i nie trwa ładowanie - nie pokazujemy nic
-  if (!isLoading && results.length === 0 && !error) {
+  if (!isLoading && (!results || results.length === 0) && !error) {
     return null;
   }
 
@@ -40,12 +44,14 @@ export const DogResultsGrid = () => {
     return (
       <section className="py-8">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-8">Wyszukiwanie psów...</h2>
+          <h2 className="text-2xl font-bold mb-8 text-[#2C4A27]">
+            Wyszukiwanie psów...
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="h-80 bg-gray-200 rounded-lg animate-pulse"
+                className="h-80 bg-[#E8EFDE] rounded-lg animate-pulse border border-[#D1DBC8]"
                 style={{ animationDelay: `${i * 0.1}s` }}
               />
             ))}
@@ -59,11 +65,11 @@ export const DogResultsGrid = () => {
     return (
       <section className="py-8">
         <div className="container mx-auto px-4">
-          <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="text-center py-12 bg-primary-50 rounded-lg shadow-sm border border-primary-200">
             <p className="text-red-500 mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="text-primary-600 hover:underline"
+              className="text-primary-600 hover:text-primary-800 hover:underline"
             >
               Spróbuj ponownie
             </button>
@@ -77,8 +83,8 @@ export const DogResultsGrid = () => {
     return (
       <section className="py-8">
         <div className="container mx-auto px-4">
-          <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
-            <p className="text-gray-600">
+          <div className="text-center py-12 bg-primary-50 rounded-lg shadow-sm border border-primary-200">
+            <p className="text-[#4A6741]">
               Nie znaleziono psów pasujących do Twoich kryteriów. Spróbuj
               zmienić opis.
             </p>
@@ -92,18 +98,9 @@ export const DogResultsGrid = () => {
     <section className="py-8">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl font-bold text-[#2C4A27]">
             Znalezione psy ({sortedResults.length})
           </h2>
-          <Select
-            label="Sortuj według"
-            defaultSelectedKeys={['match-desc']}
-            onChange={(e) => handleSortChange(e.target.value)}
-            className="w-48"
-          >
-            <SelectItem key="match-desc">Najlepsze dopasowanie</SelectItem>
-            <SelectItem key="match-asc">Najgorsze dopasowanie</SelectItem>
-          </Select>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedResults.map((dog) => (

@@ -1,8 +1,15 @@
 'use client';
 
-import { AIMatchRequestDTO, AIMatchResponseDTO } from '@/types/types';
+import { AIMatchRequestDTO, AIMatchResponseDTO, ODogSize } from '@/types/types';
 import { DogCardViewModel } from '@/types/viewModels.types';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from 'react';
+import { dogsMatchesMock } from '@/mocks/dogs';
 
 // Definiowanie typów dla kontekstu
 interface AIMatchContextType {
@@ -23,6 +30,32 @@ export function AIMatchProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [results, setResults] = useState<DogCardViewModel[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Inicjalizacja początkowych danych z mocka
+  useEffect(() => {
+    console.log('Ładowanie danych z mocka...');
+    console.log('Mock danych:', dogsMatchesMock);
+
+    if (dogsMatchesMock.matches && dogsMatchesMock.matches.length > 0) {
+      const dogCards: DogCardViewModel[] = dogsMatchesMock.matches.map(
+        (match) => {
+          console.log('Przetwarzanie psa:', match.dog.name);
+          console.log('URL obrazka:', match.dog.primary_image);
+
+          return {
+            id: match.dog.id,
+            name: match.dog.name,
+            breedName: match.dog.breed.name || 'Mieszaniec',
+            size: match.dog.breed.size,
+            imageUrl: match.dog.primary_image,
+            matchPercentage: match.match_percentage,
+          };
+        }
+      );
+      console.log('Załadowane karty psów z mocka:', dogCards);
+      setResults(dogCards);
+    }
+  }, []);
 
   const searchDogs = async (searchPrompt: string, limit: number = 12) => {
     if (searchPrompt.length < 10) {
