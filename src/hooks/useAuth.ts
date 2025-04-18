@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { AuthStatusViewModel } from '@/types/viewModels';
+import { AuthStatusViewModel } from '@/types/viewModels.types';
 
 export const useAuth = () => {
   const [authStatus, setAuthStatus] = useState<AuthStatusViewModel>({

@@ -1,9 +1,8 @@
 'use client';
 
-import { Select, SelectItem } from '@heroui/react';
 import { DogCard } from '@/components/shared/DogCard';
-import { DogCardViewModel } from '@/types/viewModels';
 import { useAIMatch } from '@/hooks/useAIMatch';
+import { Select, SelectItem } from '@heroui/react';
 
 export const DogResultsGrid = () => {
   const { results, isLoading, error } = useAIMatch();
@@ -68,12 +67,8 @@ export const DogResultsGrid = () => {
             onChange={(e) => handleSortChange(e.target.value)}
             className="w-48"
           >
-            <SelectItem key="match-desc" value="match-desc">
-              Najlepsze dopasowanie
-            </SelectItem>
-            <SelectItem key="match-asc" value="match-asc">
-              Najgorsze dopasowanie
-            </SelectItem>
+            <SelectItem key="match-desc">Najlepsze dopasowanie</SelectItem>
+            <SelectItem key="match-asc">Najgorsze dopasowanie</SelectItem>
           </Select>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -12,6 +12,8 @@ alwaysApply: true
 
 10xShelter is a central database application for dogs in shelters across Poland. The system aims to facilitate dog adoption from shelters instead of purchasing purebred dogs. It connects two main user groups: people looking to adopt dogs and shelter employees managing dog and shelter data.
 
+Do not write commenct is source code!
+
 ## Tech Stack
 
 ### Frontend

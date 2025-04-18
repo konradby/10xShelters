@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { DogCardViewModel } from '@/types/viewModels';
 import { AIMatchRequestDTO, AIMatchResponseDTO } from '@/types/types';
+import { DogCardViewModel } from '@/types/viewModels.types';
+import { useState } from 'react';
 
 export const useAIMatch = () => {
   const [prompt, setPrompt] = useState<string>('');

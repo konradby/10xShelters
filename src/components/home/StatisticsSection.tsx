@@ -1,7 +1,7 @@
 'use client';
 
-import { Card, CardBody } from '@heroui/react';
 import { useStats } from '@/hooks/useStats';
+import { Card, CardBody } from '@heroui/react';
 
 export const StatisticsSection = () => {
   const { stats, isLoading, error } = useStats();

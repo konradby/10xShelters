@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { DogCard } from '../DogCard';
-import { DogCardViewModel } from '@/types/viewModels';
+import { DogCardViewModel } from '@/types/viewModels.types';
 
 const mockDog: DogCardViewModel = {
   id: '123',

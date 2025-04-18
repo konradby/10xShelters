@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { StatsViewModel } from '@/types/viewModels';
+import { StatsViewModel } from '@/types/viewModels.types';
 
 export const useStats = () => {
   const [stats, setStats] = useState<StatsViewModel>({

@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button, Progress } from '@heroui/react';
 import { useAIMatch } from '@/hooks/useAIMatch';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Button, Progress } from '@heroui/react';
+import { useEffect, useState } from 'react';
 
 export const AIPromptInput = () => {
   const defaultPrompt =
-    'Szukam średniej wielkości psa, łagodnego i przyjaznego dla dzieci. Mieszkamy w domu z małym ogrodem na przedmieściach. Zależy mi na psie, który będzie aktywny, ale nie będzie wymagał ekstremalnych ilości ruchu - lubimy codzienne spacery i weekendowe wycieczki do parku. Preferuję psa, który nie gubi dużo sierści i jest stosunkowo łatwy w pielęgnacji. Najlepiej sprawdzi się u nas pies w wieku 1-5 lat, który jest już nauczony podstawowych komend i czysty w domu. Ważne jest dla mnie, aby pies dobrze dogadywał się z innymi zwierzętami, ponieważ odwiedzają nas czasem znajomi ze swoimi psami. Szukamy towarzysza, który będzie spokojny w domu, ale chętny do zabawy i aktywności na zewnątrz.';
+    'Szukam średniej wielkości psa, łagodnego i przyjaznego dla dzieci. Mieszkamy w domu z małym ogrodem na przedmieściach.';
 
   const { prompt, setPrompt, isLoading, error, searchDogs } = useAIMatch();
   const [characterCount, setCharacterCount] = useState(0);

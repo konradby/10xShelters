@@ -1,5 +1,5 @@
 import { Card, CardBody, CardFooter, Image } from '@heroui/react';
-import { DogCardViewModel } from '@/types/viewModels';
+import { DogCardViewModel } from '@/types/viewModels.types';
 import Link from 'next/link';
 import { memo } from 'react';
 
