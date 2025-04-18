@@ -1,28 +1,35 @@
 import { Card, CardBody, CardFooter, Image } from '@heroui/react';
 import { DogCardViewModel } from '@/types/viewModels.types';
 import Link from 'next/link';
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 
 interface DogCardProps {
   dog: DogCardViewModel;
 }
 
 export const DogCard = memo(({ dog }: DogCardProps) => {
+  const defaultImage = '/images/dog-placeholder.jpg';
   const [imgSrc, setImgSrc] = useState(
-    dog.imageUrl || '/images/dog-placeholder.jpg'
+    dog.imageUrl && dog.imageUrl.trim() !== '' ? dog.imageUrl : defaultImage
   );
+
+  useEffect(() => {
+    console.log(`Ładowanie obrazu dla psa ${dog.name}:`, imgSrc);
+  }, [dog.name, imgSrc]);
 
   return (
     <Link href={`/dogs/${dog.id}`}>
       <Card className="w-full h-full hover:scale-105 transition-transform duration-200 shadow-md hover:shadow-lg border border-[#D1DBC8] rounded-xl overflow-hidden">
         <CardBody className="p-0">
-          <Image
+          <img
             src={imgSrc}
             alt={dog.name}
             className="w-full h-52 object-cover"
-            loading="lazy"
             onError={() => {
-              setImgSrc('/images/dog-placeholder.jpg');
+              console.log(
+                `Błąd ładowania obrazu dla ${dog.name}, używanie placeholdera`
+              );
+              setImgSrc(defaultImage);
             }}
           />
         </CardBody>
