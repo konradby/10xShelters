@@ -2,62 +2,103 @@ import { AIMatchRequestDTO } from '../types/types';
 
 export class AIService {
   private readonly API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-  private cache: Map<string, any>;
-  private readonly CACHE_TTL = 3600000; // 1 godzina
+  private cache = new Map<string, any>();
+  private readonly CACHE_TTL = 3600000;
+  private readonly MODEL = 'openai/o3-mini';
 
   constructor() {
     if (!process.env.OPENROUTER_API_KEY) {
       throw new Error('OPENROUTER_API_KEY is not set');
     }
-    this.cache = new Map();
   }
 
-  async matchDogs(request: AIMatchRequestDTO): Promise<any> {
+  async matchDogs(
+    request: AIMatchRequestDTO,
+    availableDogs: any[]
+  ): Promise<any> {
     const cacheKey = this.generateCacheKey(request);
     const cachedResult = this.getFromCache(cacheKey);
-    if (cachedResult) {
-      return cachedResult;
+    
+    if (cachedResult) return cachedResult;
+
+    if (!availableDogs || availableDogs.length === 0) {
+      throw new Error('Brak dostępnych psów do dopasowania');
     }
 
-    try {
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'https://10xshelter.pl',
-          'X-Title': '10xShelter',
-        },
-        body: JSON.stringify({
-          model: 'deepseek/deepseek-v3-base:free',
-          messages: [
-            {
-              role: 'system',
-              content:
-                'Jesteś ekspertem w dopasowywaniu psów do preferencji użytkowników. Analizujesz opis preferencji i zwracasz listę psów najlepiej pasujących do kryteriów. Odpowiedź musi być w formacie JSON zgodnym z następującym schematem: { "matches": [ { "dog_id": "id_psa", "match_percentage": liczba_od_0_do_100, "reasoning": "uzasadnienie_dlaczego_pies_pasuje" } ] }. Nie dodawaj żadnego tekstu przed ani po strukturze JSON.',
-            },
-            {
-              role: 'user',
-              content: request.prompt,
-            },
-          ],
-        }),
-      });
+    const dogsData = availableDogs.map((dog) => {
+      const breedInfo =
+        Array.isArray(dog.breed) && dog.breed.length > 0
+          ? dog.breed[0]
+          : { name: '', size: '' };
 
-      if (!response.ok) {
-        throw new Error(
-          `AI service returned ${response.status}: ${response.statusText}`
-        );
-      }
+      return {
+        id: dog.id,
+        name: dog.name,
+        breed: breedInfo.name,
+        size: breedInfo.size,
+      };
+    });
 
-      const data = await response.json();
-      const result = this.processAIResponse(data);
-      this.setCache(cacheKey, result);
-      return result;
-    } catch (error) {
+    return this.callAIModel(request, dogsData).catch((error) => {
       console.error('Error in AI service:', error);
-      throw new Error('AI service is currently unavailable');
+      return this.generateFallbackMatches(availableDogs);
+    });
+  }
+
+  private async callAIModel(
+    request: AIMatchRequestDTO,
+    dogsData: any[]
+  ): Promise<any> {
+    console.log(`🚀 ~ callAIModel ~ using model: ${this.MODEL}`);
+
+    const response = await fetch(this.API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://10xshelter.pl',
+        'X-Title': '10xShelter',
+      },
+      body: JSON.stringify({
+        model: this.MODEL,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Jesteś ekspertem w dopasowywaniu psów do preferencji użytkowników. Analizujesz opis preferencji i listę dostępnych psów, a następnie zwracasz listę psów najlepiej pasujących do kryteriów. WAŻNE: Twoja odpowiedź MUSI zawierać wyłącznie obiekt JSON zgodny z tym schematem: { "matches": [ { "dog_id": "id_psa", "match_percentage": liczba_od_0_do_100, "reasoning": "uzasadnienie_dlaczego_pies_pasuje" } ] }.',
+          },
+          {
+            role: 'user',
+            content: `Preferencje użytkownika: ${request.prompt}\n\nDostępne psy: ${JSON.stringify(dogsData)}`,
+          },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.5,
+        max_tokens: 1500,
+      }),
+    }).catch((error) => {
+      console.error('Fetch error:', error);
+      throw new Error('AI service network error');
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `AI service returned ${response.status}: ${response.statusText}`
+      );
     }
+
+    const data = await response.json().catch((error) => {
+      console.error('JSON parse error:', error);
+      throw new Error('AI service returned invalid JSON');
+    });
+
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('Empty AI response');
+    }
+
+    const result = this.processAIResponse(data);
+    this.setCache(this.generateCacheKey(request), result);
+    return result;
   }
 
   private generateCacheKey(request: AIMatchRequestDTO): string {
@@ -85,46 +126,57 @@ export class AIService {
   }
 
   private processAIResponse(response: any): any {
-    try {
-      const content = response.choices[0].message.content;
+    const content = response.choices[0].message.content;
 
-      // Próba wyodrębnienia JSON z odpowiedzi
-      let jsonContent = content;
+    return this.extractAndParseJson(content).catch(() => {
+      throw new Error('Failed to parse AI response as JSON');
+    });
+  }
 
-      // Szukaj znaków przypominających początek JSON (może być zagubiony w tekście)
-      const jsonStartMatch = content.match(/\{\s*"matches"/);
-      if (jsonStartMatch) {
-        jsonContent = content.substring(jsonStartMatch.index);
-      }
+  private async extractAndParseJson(content: string): Promise<any> {
+    const jsonStartIndex = content.indexOf('{');
+    const jsonEndIndex = content.lastIndexOf('}');
 
-      // Próba sparsowania JSON
-      try {
-        const parsedContent = JSON.parse(jsonContent);
-
-        if (Array.isArray(parsedContent.matches)) {
-          return parsedContent.matches.map((match: any) => ({
-            dog_id: match.dog_id,
-            match_percentage: match.match_percentage,
-            reasoning: match.reasoning,
-          }));
-        }
-      } catch (jsonError) {
-        console.error('Failed to parse AI response as JSON:', jsonError);
-      }
-
-      // Jeśli nie udało się sparsować jako JSON, generujemy przykładowe dane
-      console.warn('Generating fallback response due to invalid AI format');
-      return [
-        {
-          dog_id: '1',
-          match_percentage: 85,
-          reasoning:
-            'Nie udało się przetworzyć odpowiedzi AI. To jest automatycznie wygenerowane dopasowanie.',
-        },
-      ];
-    } catch (error) {
-      console.error('Error processing AI response:', error);
-      throw new Error('Failed to process AI response');
+    if (
+      jsonStartIndex === -1 ||
+      jsonEndIndex === -1 ||
+      jsonEndIndex <= jsonStartIndex
+    ) {
+      throw new Error('No valid JSON found in the response');
     }
+
+    const jsonContent = content.substring(jsonStartIndex, jsonEndIndex + 1);
+    const parsedContent = JSON.parse(jsonContent);
+
+    if (!parsedContent.matches || !Array.isArray(parsedContent.matches)) {
+      throw new Error('Invalid JSON structure');
+    }
+
+    interface MatchItem {
+      dog_id?: string;
+      match_percentage?: number;
+      reasoning?: string;
+    }
+
+    return parsedContent.matches.map((match: MatchItem) => ({
+      dog_id: match.dog_id || '',
+      match_percentage:
+        typeof match.match_percentage === 'number' ? match.match_percentage : 0,
+      reasoning: match.reasoning || '',
+    }));
+  }
+
+  private generateFallbackMatches(availableDogs: any[]): any {
+    const maxDogs = Math.min(5, availableDogs.length);
+    const selectedDogs = [...availableDogs]
+      .sort(() => 0.5 - Math.random())
+      .slice(0, maxDogs);
+
+    return selectedDogs.map((dog, index) => ({
+      dog_id: dog.id,
+      match_percentage: 90 - index * 10,
+      reasoning:
+        'To automatyczne dopasowanie zostało wygenerowane, ponieważ system AI nie był w stanie przetworzyć zapytania.',
+    }));
   }
 }
