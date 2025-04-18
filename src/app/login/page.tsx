@@ -11,22 +11,26 @@ export default function LoginPage() {
 
           <form className="space-y-4">
             <div>
+              <label htmlFor="email" className="block mb-1">
+                Email:
+              </label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                label="Email"
                 placeholder="twoj@email.pl"
                 required
               />
             </div>
 
             <div>
+              <label htmlFor="password" className="block mb-1">
+                Hasło:
+              </label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                label="Hasło"
                 placeholder="********"
                 required
               />
