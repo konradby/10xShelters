@@ -1,12 +1,23 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { AIMatchRequestSchema } from '@/lib/schemas/ai-match.schema';
 import { AIService } from '@/lib/ai-service';
 import { AIMatch } from './types';
+import { Database } from '@/db/database.types';
 
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookies().get(name)?.value;
+        },
+      },
+    }
+  );
 
   const body = await request.json();
   const validationResult = AIMatchRequestSchema.safeParse(body);
@@ -19,15 +30,24 @@ export async function POST(request: Request) {
   }
 
   const aiService = new AIService();
-  const aiMatches = (await aiService.matchDogs(body).catch((error) => {
+  let aiMatches: AIMatch[] | null = null;
+
+  try {
+    aiMatches = await aiService.matchDogs(body);
+  } catch (error) {
     console.error('Error in AI service:', error);
     return NextResponse.json(
       { error: 'Wystąpił błąd podczas przetwarzania AI' },
       { status: 503 }
     );
-  })) as AIMatch[] | undefined;
+  }
 
-  if (!aiMatches) return;
+  if (!aiMatches || !Array.isArray(aiMatches) || aiMatches.length === 0) {
+    return NextResponse.json(
+      { error: 'Nie otrzymano wyników dopasowania' },
+      { status: 404 }
+    );
+  }
 
   const { data: dogs, error: dogsError } = await supabase
     .from('dogs')
@@ -56,13 +76,13 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!dogs) {
+  if (!dogs || dogs.length === 0) {
     return NextResponse.json({ error: 'Nie znaleziono psów' }, { status: 404 });
   }
 
   const response = {
-    matches: dogs.map((dog) => {
-      const match = aiMatches.find((m) => m.dog_id === dog.id);
+    matches: dogs.map((dog: any) => {
+      const match = aiMatches?.find((m) => m.dog_id === dog.id);
       const breedInfo =
         Array.isArray(dog.breed) && dog.breed.length > 0
           ? dog.breed[0]
