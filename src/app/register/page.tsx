@@ -1,19 +1,19 @@
 'use client';
 
-import { login } from './actions';
+import { signup } from './actions';
 import { Card, CardBody, Button, Input } from '@heroui/react';
 import { useSearchParams } from 'next/navigation';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-[#F5F7F2]">
       <Card className="w-full max-w-md border-none shadow-lg rounded-xl">
         <CardBody className="p-6">
           <h1 className="text-2xl font-bold mb-6 text-center text-[#2C4A27]">
-            Logowanie
+            Rejestracja
           </h1>
 
-          <form className="space-y-4" action={login}>
+          <form className="space-y-4" action={signup}>
             <div>
               <label htmlFor="email" className="block mb-1 text-[#2C4A27]">
                 Email:
@@ -47,16 +47,16 @@ export default function LoginPage() {
                 type="submit"
                 className="w-full bg-[#2C4A27] text-white hover:bg-[#3C5A37] rounded-lg"
               >
-                Zaloguj się
+                Zarejestruj się
               </Button>
 
               <Button
                 as="a"
-                href="/register"
+                href="/login"
                 className="w-full bg-[#A7C4A0] text-[#2C4A27] hover:bg-[#8BAD84] rounded-lg"
                 variant="flat"
               >
-                Zarejestruj się
+                Powrót do logowania
               </Button>
             </div>
           </form>

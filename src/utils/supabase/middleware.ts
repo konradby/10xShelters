@@ -40,14 +40,30 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  const { pathname } = request.nextUrl;
+
+  // Publiczne ścieżki, które nie wymagają autentykacji
+  const publicPaths = [
+    '/',
+    '/login',
+    '/register',
+    '/dogs',
+    '/auth/callback',
+    '/api/public',
+  ];
+
+  // Jeśli użytkownik nie jest zalogowany i próbuje uzyskać dostęp do chronionej ścieżki
+  if (!user && !publicPaths.some((path) => pathname.startsWith(path))) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
+    url.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Jeśli użytkownik jest zalogowany i próbuje uzyskać dostęp do strony logowania/rejestracji
+  if (user && (pathname === '/login' || pathname === '/register')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
     return NextResponse.redirect(url);
   }
 
