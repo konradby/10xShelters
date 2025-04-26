@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
 // Cache dla statystyk (TTL: 5 minut)
 const CACHE_TTL = 5 * 60 * 1000;
@@ -11,14 +11,12 @@ let statsCache: {
 
 export async function GET() {
   try {
-    // Sprawdzenie cache'u
     if (statsCache && Date.now() - statsCache.timestamp < CACHE_TTL) {
       return NextResponse.json(statsCache.data);
     }
 
     const supabase = createRouteHandlerClient({ cookies });
 
-    // Pobieramy szczegółowe statystyki z widoku shelter_stats
     const { data: shelterStats, error: shelterStatsError } = await supabase
       .from('shelter_stats')
       .select('*');

@@ -1,35 +1,43 @@
-import { type NextRequest } from 'next/server';
-import { updateSession } from '@/utils/supabase/middleware';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const res = NextResponse.next();
 
-  // Publiczne ścieżki, które nie wymagają autentykacji
-  const publicPaths = [
-    '/',
-    '/login',
-    '/register',
-    '/dogs',
-    '/auth/callback',
-    '/api/public',
-  ];
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          res.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options: any) {
+          res.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+        },
+      },
+    }
+  );
 
-  // Sprawdź czy ścieżka jest publiczna
-  if (publicPaths.some((path) => pathname.startsWith(path))) {
-    return await updateSession(request);
+  try {
+    await supabase.auth.getSession();
+  } catch (error) {
+    console.error('Middleware - Error getting session:', error);
   }
 
-  // Sprawdź czy ścieżka jest statycznym zasobem
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/static') ||
-    pathname.match(/\.(jpg|jpeg|png|gif|ico|svg|webp)$/)
-  ) {
-    return;
-  }
-
-  // Dla pozostałych ścieżek wymagana jest autentykacja
-  return await updateSession(request);
+  return res;
 }
 
 export const config = {
@@ -39,8 +47,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public files
+     * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
   ],
 };

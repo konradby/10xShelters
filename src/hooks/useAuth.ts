@@ -1,8 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import { AuthStatusViewModel } from '@/types/viewModels.types';
+
+const clearAuthStorage = () => {
+  // Wyczyść wszystkie ciasteczka związane z autentykacją
+  document.cookie.split(';').forEach((cookie) => {
+    const [name] = cookie.split('=');
+    if (name.trim().startsWith('supabase.auth.')) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    }
+  });
+
+  // Wyczyść localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.')) {
+      localStorage.removeItem(key);
+    }
+  });
+};
 
 export const useAuth = () => {
   const [authStatus, setAuthStatus] = useState<AuthStatusViewModel>({
@@ -11,16 +28,41 @@ export const useAuth = () => {
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
+    // Wyczyść storage przed sprawdzeniem statusu autentykacji
+    clearAuthStorage();
+
     const checkAuthStatus = async () => {
       try {
+        console.log('useAuth - Checking auth status...');
+
         const {
           data: { session },
+          error,
         } = await supabase.auth.getSession();
 
+        if (error) {
+          console.error('useAuth - Error getting session:', error);
+          return;
+        }
+
+        console.log(
+          'useAuth - getSession result:',
+          !!session,
+          session?.user?.id
+        );
+
         if (session) {
+          console.log(
+            'useAuth - session exists, user metadata:',
+            session.user.user_metadata
+          );
+
           setAuthStatus({
             isLoggedIn: true,
             user: {
@@ -31,6 +73,8 @@ export const useAuth = () => {
                 'user',
             },
           });
+
+          console.log('useAuth - authStatus updated with user');
         }
       } catch (e) {
         console.error('Error checking auth status:', e);
@@ -44,6 +88,16 @@ export const useAuth = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('useAuth - onAuthStateChange event:', _event, !!session);
+
+      if (session) {
+        console.log('useAuth - Session details:', {
+          id: session.user.id,
+          email: session.user.email,
+          metadata: session.user.user_metadata,
+        });
+      }
+
       setAuthStatus({
         isLoggedIn: !!session,
         user: session
@@ -56,6 +110,11 @@ export const useAuth = () => {
             }
           : null,
       });
+
+      console.log(
+        'useAuth - authStatus updated after state change:',
+        !!session
+      );
     });
 
     return () => {

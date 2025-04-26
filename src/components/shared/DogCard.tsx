@@ -1,7 +1,7 @@
-import { Card, CardBody, CardFooter, Image } from '@heroui/react';
 import { DogCardViewModel } from '@/types/viewModels.types';
+import { Card, CardBody, CardFooter } from '@heroui/react';
 import Link from 'next/link';
-import { memo, useState, useEffect } from 'react';
+import { memo, useState } from 'react';
 
 interface DogCardProps {
   dog: DogCardViewModel;
@@ -12,10 +12,6 @@ export const DogCard = memo(({ dog }: DogCardProps) => {
   const [imgSrc, setImgSrc] = useState(
     dog.imageUrl && dog.imageUrl.trim() !== '' ? dog.imageUrl : defaultImage
   );
-
-  useEffect(() => {
-    console.log(`Ładowanie obrazu dla psa ${dog.name}:`, imgSrc);
-  }, [dog.name, imgSrc]);
 
   return (
     <Link href={`/dogs/${dog.id}`}>

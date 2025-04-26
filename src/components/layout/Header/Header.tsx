@@ -10,6 +10,7 @@ import { MobileMenu } from './MobileMenu';
 
 export const Header = () => {
   const { isLoggedIn, user, isLoading } = useAuth();
+  console.log('🚀 ~ Header ~ user:', user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
