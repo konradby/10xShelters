@@ -3,14 +3,13 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Navbar, NavbarBrand } from '@heroui/react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { DesktopMenu } from './DesktopMenu';
 import { MenuIcon } from './icons';
 import { MobileMenu } from './MobileMenu';
 
-export const Header = () => {
+export const Header = memo(() => {
   const { isLoggedIn, user, isLoading } = useAuth();
-  console.log('🚀 ~ Header ~ user:', user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -71,4 +70,6 @@ export const Header = () => {
       </div>
     </Navbar>
   );
-};
+});
+
+Header.displayName = 'Header';
