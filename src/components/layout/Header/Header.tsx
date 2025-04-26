@@ -24,13 +24,14 @@ export const Header = memo(() => {
   return (
     <Navbar
       maxWidth="full"
+      data-e2e-id="header"
       className="absolute top-0 left-0 right-0 z-50 bg-transparent text-white px-4 md:px-12 h-20"
       isBlurred={false}
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
     >
       <div className="container mx-auto flex w-full items-center justify-between">
-        <NavbarBrand>
+        <NavbarBrand data-e2e-id="header-logo">
           <Link
             href="/"
             className="flex items-center gap-2"
