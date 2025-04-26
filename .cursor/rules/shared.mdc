@@ -85,6 +85,7 @@ When modifying the directory structure, always update this section.
 - Use HeroUI components for consistent UI
 - Follow Tailwind best practices for styling
 - Implement proper testing with Playwright and Vitest
+- Use await().catch instead try/catch is possible
 
 ### Polish Language Support
 

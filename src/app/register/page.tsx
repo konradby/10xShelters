@@ -1,7 +1,7 @@
 'use client';
 
 import { signup } from './actions';
-import { Card, CardBody, Button, Input } from '@heroui/react';
+import { Card, CardBody, Button, Input, Form } from '@heroui/react';
 import { useSearchParams } from 'next/navigation';
 
 export default function RegisterPage() {
@@ -13,7 +13,7 @@ export default function RegisterPage() {
             Rejestracja
           </h1>
 
-          <form className="space-y-4" action={signup}>
+          <Form action={signup} className="space-y-4" validationBehavior="aria">
             <div>
               <label htmlFor="email" className="block mb-1 text-[#2C4A27]">
                 Email:
@@ -59,7 +59,7 @@ export default function RegisterPage() {
                 Powrót do logowania
               </Button>
             </div>
-          </form>
+          </Form>
 
           <div className="mt-4 text-center text-sm">
             <MessageDisplay />
