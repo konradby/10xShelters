@@ -1,17 +1,21 @@
 'use client';
 
-import { DogCard } from '@/components/shared/DogCard';
 import { useAIMatch } from '@/app/context/AIMatchContext';
-import { Select, SelectItem } from '@heroui/react';
-import { useState, useEffect } from 'react';
+import { DogCard } from '@/components/shared/DogCard';
+import { useMemo, useState, useEffect } from 'react';
 
 export const DogResultsGrid = () => {
   const { results, isLoading, error } = useAIMatch();
   const [sortOrder, setSortOrder] = useState('match-desc');
+  const [mounted, setMounted] = useState(false);
 
-  // Inicjalizujemy sortedResults bezpośrednio z results i sortOrder,
-  // zamiast używać pustej tablicy (co powoduje różnicę między serwerem a klientem)
-  const getSortedResults = () => {
+  // Upewniamy się, że komponent jest renderowany tylko po stronie klienta
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Używamy useMemo do sortowania wyników
+  const sortedResults = useMemo(() => {
     if (!results || results.length === 0) return [];
 
     return [...results].sort((a, b) => {
@@ -22,18 +26,16 @@ export const DogResultsGrid = () => {
       }
       return 0;
     });
-  };
-
-  const [sortedResults, setSortedResults] = useState(getSortedResults());
-
-  // Aktualizuj posortowane wyniki, gdy zmienią się oryginalne wyniki lub sortowanie
-  useEffect(() => {
-    setSortedResults(getSortedResults());
   }, [results, sortOrder]);
 
   const handleSortChange = (value: string) => {
     setSortOrder(value);
   };
+
+  // Nie renderujemy nic do momentu montowania komponentu po stronie klienta
+  if (!mounted) {
+    return null;
+  }
 
   // Brak wyników i nie trwa ładowanie - nie pokazujemy nic
   if (!isLoading && (!results || results.length === 0) && !error) {

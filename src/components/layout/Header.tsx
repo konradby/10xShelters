@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@heroui/react';
 import { useAuth } from '@/hooks/useAuth';
+import { createClient } from '@/utils/supabase/client';
 import {
   Navbar,
   NavbarBrand,
@@ -37,12 +38,19 @@ const CloseIcon = () => (
 
 export const Header = () => {
   const { isLoggedIn, user, isLoading } = useAuth();
+  console.log("🚀 ~ Header ~ user:", user)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  };
 
   const menuItems = isLoggedIn ? (
     <div className="flex flex-col gap-6">
@@ -60,6 +68,7 @@ export const Header = () => {
         color="danger"
         className="w-full text-white bg-white/10 hover:bg-white/20 py-3 backdrop-blur-sm rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-lg font-medium"
         size="lg"
+        onPress={handleLogout}
       >
         Wyloguj
       </Button>
@@ -143,6 +152,7 @@ export const Header = () => {
                     variant="flat"
                     color="danger"
                     className="text-white hover:bg-[#2C4A27]/40 px-6 py-2 backdrop-blur-sm rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    onPress={handleLogout}
                   >
                     Wyloguj
                   </Button>

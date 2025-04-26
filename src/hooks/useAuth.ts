@@ -18,12 +18,7 @@ export const useAuth = () => {
       try {
         const {
           data: { session },
-          error,
         } = await supabase.auth.getSession();
-
-        if (error) {
-          throw error;
-        }
 
         if (session) {
           setAuthStatus({
@@ -46,25 +41,25 @@ export const useAuth = () => {
 
     checkAuthStatus();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setAuthStatus({
-          isLoggedIn: !!session,
-          user: session
-            ? {
-                id: session.user.id,
-                email: session.user.email || '',
-                role:
-                  (session.user.user_metadata.role as 'user' | 'employee') ||
-                  'user',
-              }
-            : null,
-        });
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthStatus({
+        isLoggedIn: !!session,
+        user: session
+          ? {
+              id: session.user.id,
+              email: session.user.email || '',
+              role:
+                (session.user.user_metadata.role as 'user' | 'employee') ||
+                'user',
+            }
+          : null,
+      });
+    });
 
     return () => {
-      authListener?.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, [supabase.auth]);
 
