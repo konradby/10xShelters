@@ -14,7 +14,7 @@ export default function RegisterPage() {
           </h1>
 
           <Form action={signup} className="space-y-4" validationBehavior="aria">
-            <div>
+            <div className="w-full">
               <label htmlFor="email" className="block mb-1 text-[#2C4A27]">
                 Email:
               </label>
@@ -28,7 +28,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div>
+            <div className="w-full">
               <label htmlFor="password" className="block mb-1 text-[#2C4A27]">
                 Hasło:
               </label>
@@ -42,7 +42,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div className="flex flex-col gap-2 mt-6">
+            <div className="w-full flex flex-col gap-2 mt-6">
               <Button
                 type="submit"
                 className="w-full bg-[#2C4A27] text-white hover:bg-[#3C5A37] rounded-lg"
