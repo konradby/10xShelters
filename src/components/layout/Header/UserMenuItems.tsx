@@ -34,6 +34,7 @@ export const UserMenuItems = ({
           className="w-full text-white bg-white/10 hover:bg-white/20 py-3 backdrop-blur-sm rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] text-lg font-medium"
           size="lg"
           onPress={handleLogout}
+          data-e2e-id="mobile-logout-button"
         >
           Wyloguj
         </Button>
@@ -57,6 +58,7 @@ export const UserMenuItems = ({
         color="danger"
         className="text-white hover:bg-[#2C4A27]/40 px-6 py-2 backdrop-blur-sm rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         onPress={handleLogout}
+        data-e2e-id="desktop-logout-button"
       >
         Wyloguj
       </Button>

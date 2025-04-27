@@ -13,7 +13,11 @@ export default function LoginPage() {
             Logowanie
           </h1>
 
-          <Form action={login} className="space-y-4 w-full" validationBehavior="aria">
+          <Form
+            action={login}
+            className="space-y-4 w-full"
+            validationBehavior="aria"
+          >
             <div className="w-full">
               <label htmlFor="email" className="block mb-1 text-[#2C4A27]">
                 Email:
@@ -25,6 +29,7 @@ export default function LoginPage() {
                 placeholder="twoj@email.pl"
                 required
                 className="rounded-lg text-[#2C4A27]"
+                data-e2e-id="login-email"
               />
             </div>
 
@@ -39,6 +44,7 @@ export default function LoginPage() {
                 placeholder="********"
                 required
                 className="rounded-lg text-[#2C4A27]"
+                data-e2e-id="login-password"
               />
             </div>
 
@@ -46,6 +52,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full bg-[#2C4A27] text-white hover:bg-[#3C5A37] rounded-lg"
+                data-e2e-id="login-submit"
               >
                 Zaloguj się
               </Button>
@@ -77,7 +84,11 @@ function MessageDisplay() {
 
   return (
     <>
-      {error && <p className="text-red-500">{error}</p>}
+      {error && (
+        <p className="text-red-500" data-e2e-id="login-error">
+          {error}
+        </p>
+      )}
       {message && <p className="text-[#2C4A27]">{message}</p>}
     </>
   );
