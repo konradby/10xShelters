@@ -1,9 +1,9 @@
-import { Metadata } from 'next';
-import { createClient } from '@/utils/supabase/server';
-import { DogDetails } from './components/DogDetails';
-import { notFound } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { createClient } from '@/utils/supabase/server';
+import { Metadata } from 'next';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
+import { DogDetails } from './components/DogDetails';
 
 type Props = {
   params: {

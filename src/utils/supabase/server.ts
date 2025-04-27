@@ -1,6 +1,5 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { Database } from '@/db/database.types';
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -14,18 +13,18 @@ export async function createClient() {
           const cookie = cookieStore.get(name);
           return cookie?.value;
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set(name, value, {
               ...options,
               sameSite: 'lax',
               path: '/',
             });
-          } catch (error) {
+          } catch {
             // Ignoruj błędy podczas ustawiania ciasteczek w Server Components
           }
         },
-        remove(name: string, options: any) {
+        remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set(name, '', {
               ...options,
@@ -33,7 +32,7 @@ export async function createClient() {
               sameSite: 'lax',
               path: '/',
             });
-          } catch (error) {
+          } catch {
             // Ignoruj błędy podczas usuwania ciasteczek w Server Components
           }
         },

@@ -1,6 +1,24 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
+interface DogImage {
+  id: string;
+  image_path: string;
+  is_primary: boolean;
+}
+
+interface Tag {
+  id: string;
+  name: string;
+}
+
+interface TagEntry {
+  tag: {
+    id: string;
+    name: string;
+  }[];
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -65,11 +83,10 @@ export async function GET(
   }
 
   if (!dog) {
-    return NextResponse.json(
-      { error: 'Nie znaleziono psa o podanym ID' },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'Dog not found' }, { status: 404 });
   }
+
+  console.log('Dog tags structure:', JSON.stringify(dog.tags, null, 2));
 
   // Przygotowanie danych do odpowiedzi
   const breedInfo =
@@ -78,13 +95,15 @@ export async function GET(
       : { name: '', size: '' };
 
   const primaryImage = Array.isArray(dog.images)
-    ? dog.images.find((img: any) => img.is_primary)?.image_path ||
+    ? dog.images.find((img: DogImage) => img.is_primary)?.image_path ||
       dog.images[0]?.image_path ||
       null
     : null;
 
   const dogTags = Array.isArray(dog.tags)
-    ? dog.tags.map((tagEntry: any) => tagEntry.tag).filter(Boolean)
+    ? dog.tags
+        .flatMap((tagEntry: TagEntry) => tagEntry.tag)
+        .filter((tag): tag is Tag => tag !== null && tag !== undefined)
     : [];
 
   const dogData = {
@@ -102,25 +121,31 @@ export async function GET(
       name: breedInfo.name,
       size: breedInfo.size,
       coat_type: 'coat_type' in breedInfo ? breedInfo.coat_type : undefined,
-      energy_level: 'energy_level' in breedInfo ? breedInfo.energy_level : undefined,
-      shedding_level: 'shedding_level' in breedInfo ? breedInfo.shedding_level : undefined,
-      sociability: 'sociability' in breedInfo ? breedInfo.sociability : undefined,
-      trainability: 'trainability' in breedInfo ? breedInfo.trainability : undefined,
-      description: 'description' in breedInfo ? breedInfo.description : undefined,
+      energy_level:
+        'energy_level' in breedInfo ? breedInfo.energy_level : undefined,
+      shedding_level:
+        'shedding_level' in breedInfo ? breedInfo.shedding_level : undefined,
+      sociability:
+        'sociability' in breedInfo ? breedInfo.sociability : undefined,
+      trainability:
+        'trainability' in breedInfo ? breedInfo.trainability : undefined,
+      description:
+        'description' in breedInfo ? breedInfo.description : undefined,
     },
-    shelter: dog.shelter && Array.isArray(dog.shelter) && dog.shelter.length > 0
-      ? {
-          id: dog.shelter[0].id,
-          name: dog.shelter[0].name,
-          city: dog.shelter[0].city,
-          address: dog.shelter[0].address,
-          phone: dog.shelter[0].phone,
-          email: dog.shelter[0].email,
-        }
-      : null,
+    shelter:
+      dog.shelter && Array.isArray(dog.shelter) && dog.shelter.length > 0
+        ? {
+            id: dog.shelter[0].id,
+            name: dog.shelter[0].name,
+            city: dog.shelter[0].city,
+            address: dog.shelter[0].address,
+            phone: dog.shelter[0].phone,
+            email: dog.shelter[0].email,
+          }
+        : null,
     primary_image: primaryImage,
     images: Array.isArray(dog.images)
-      ? dog.images.map((img: any) => ({
+      ? dog.images.map((img: DogImage) => ({
           id: img.id,
           url: img.image_path,
           is_primary: img.is_primary,

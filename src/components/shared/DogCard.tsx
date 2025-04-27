@@ -1,6 +1,7 @@
 import { DogCardViewModel } from '@/types/viewModels.types';
 import { Card, CardBody, CardFooter } from '@heroui/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { memo, useState } from 'react';
 
 interface DogCardProps {
@@ -17,17 +18,22 @@ export const DogCard = memo(({ dog }: DogCardProps) => {
     <Link href={`/dogs/${dog.id}`}>
       <Card className="w-full h-full hover:scale-105 transition-transform duration-200 shadow-md hover:shadow-lg border border-[#D1DBC8] rounded-xl overflow-hidden">
         <CardBody className="p-0">
-          <img
-            src={imgSrc}
-            alt={dog.name}
-            className="w-full h-52 object-cover"
-            onError={() => {
-              console.log(
-                `Błąd ładowania obrazu dla ${dog.name}, używanie placeholdera`
-              );
-              setImgSrc(defaultImage);
-            }}
-          />
+          <div className="relative w-full h-52">
+            <Image
+              src={imgSrc}
+              alt={dog.name}
+              fill
+              className="object-cover"
+              onError={() => {
+                console.log(
+                  `Błąd ładowania obrazu dla ${dog.name}, używanie placeholdera`
+                );
+                setImgSrc(defaultImage);
+              }}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={false}
+            />
+          </div>
         </CardBody>
         <CardFooter className="flex flex-col items-start gap-3 p-5 bg-white">
           <h3 className="text-xl font-semibold text-[#2C4A27]">{dog.name}</h3>

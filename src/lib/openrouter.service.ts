@@ -1,12 +1,11 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { z } from 'zod';
 import {
+  ChatResponse,
   Message,
+  Model,
   ModelParams,
   ResponseFormat,
-  Model,
-  ChatResponse,
 } from '@/types/openrouter.types';
+import axios, { AxiosInstance } from 'axios';
 
 // Klasa błędów
 export class OpenRouterError extends Error {

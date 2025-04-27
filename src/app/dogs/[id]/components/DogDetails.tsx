@@ -1,15 +1,8 @@
 'use client';
 
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Chip,
-  Divider,
-  Button,
-  Image,
-} from '@heroui/react';
 import { ODogGender } from '@/types/types';
+import { Button, Card, CardBody, CardHeader, Chip } from '@heroui/react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -69,15 +62,18 @@ export function DogDetails({ dog }: DogDetailsProps) {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sekcja zdjęć */}
           <div className="w-full md:w-1/2">
-            <div className="mb-4">
-              <img
+            <div className="mb-4 relative w-full h-96">
+              <Image
                 src={selectedImage}
                 alt={dog.name}
-                className="w-full h-96 object-cover rounded-xl shadow-md"
+                fill
+                className="object-cover rounded-xl shadow-md"
                 onError={(e) => {
-                  // @ts-ignore
+                  // @ts-expect-error - TypeScript doesn't know about the src property on the event target
                   e.target.src = '/images/dog-placeholder.jpg';
                 }}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority={true}
               />
             </div>
 
@@ -93,15 +89,20 @@ export function DogDetails({ dog }: DogDetailsProps) {
                     }`}
                     onClick={() => handleImageClick(image.url)}
                   >
-                    <img
-                      src={image.url}
-                      alt={dog.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // @ts-ignore
-                        e.target.src = '/images/dog-placeholder.jpg';
-                      }}
-                    />
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={image.url}
+                        alt={dog.name}
+                        fill
+                        className="object-cover"
+                        onError={(e) => {
+                          // @ts-expect-error - TypeScript doesn't know about the src property on the event target
+                          e.target.src = '/images/dog-placeholder.jpg';
+                        }}
+                        sizes="80px"
+                        priority={false}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
