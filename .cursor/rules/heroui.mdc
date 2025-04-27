@@ -1,0 +1,165 @@
+---
+description: 
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# HeroUI (formerly NextUI) Components
+
+This project uses HeroUI for user interface components. These are modern, accessible components optimized for Next.js and Tailwind CSS.
+
+## Finding installed components
+
+HeroUI components are available after installing the `@heroui/react` dependency. Import them directly from the library.
+
+## Using components
+
+Import the needed components from the `@heroui/react` package
+
+```tsx
+import { Button } from "@heroui/react";
+import { Tabs, Tab, TabList, TabPanel } from "@heroui/react";
+import { Card, CardBody, CardHeader, CardFooter } from "@heroui/react";
+```
+
+Example component usage:
+
+```tsx
+<Button variant="bordered">Click me</Button>
+
+<Card>
+  <CardHeader>
+    <h4>Card Title</h4>
+    <p>Card Description</p>
+  </CardHeader>
+  <CardBody>
+    <p>Card Content</p>
+  </CardBody>
+  <CardFooter>
+    <p>Card Footer</p>
+  </CardFooter>
+</Card>
+```
+
+## Installing the library
+
+To install HeroUI in your project, use the following command:
+
+```bash
+yarn add @heroui/react
+```
+
+Make sure you have Tailwind CSS configured since HeroUI is built on top of it.
+
+## Provider
+
+For HeroUI components to work correctly, you need to wrap your application in the `HeroUIProvider`:
+
+```tsx
+// app/providers.tsx
+"use client";
+
+import { HeroUIProvider } from "@heroui/react";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <HeroUIProvider>
+      {children}
+    </HeroUIProvider>
+  );
+}
+
+// app/layout.tsx
+import { Providers } from "./providers";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+## Popular components
+
+HeroUI provides a wide range of components, including:
+
+- Accordion
+- Avatar
+- Badge
+- Button
+- Card
+- Checkbox
+- Chip
+- Dropdown
+- Input
+- Modal
+- Navbar
+- Pagination
+- Progress
+- Radio
+- Select
+- Slider
+- Switch
+- Table
+- Tabs
+- Textarea
+- Tooltip
+
+## Component Styling
+
+HeroUI is built on Tailwind CSS, which makes it easy to customize the appearance of components:
+
+```tsx
+// Using Tailwind classes with HeroUI components
+<Button className="bg-primary-500 hover:bg-primary-700 text-white font-bold">
+  Custom Button
+</Button>
+```
+
+### Theme Configuration
+
+HeroUI allows theme configuration through the `HeroUIProvider`:
+
+```tsx
+<HeroUIProvider
+  theme={{
+    themes: {
+      light: {
+        colors: {
+          primary: "#0070f3",
+          // ... other colors
+        }
+      },
+      dark: {
+        colors: {
+          primary: "#3694ff",
+          // ... other colors
+        }
+      }
+    }
+  }}
+>
+  {children}
+</HeroUIProvider>
+```
+
+### Light and Dark Themes
+
+HeroUI supports automatic switching between light and dark modes:
+
+```tsx
+<HeroUIProvider disableAutoMode>
+  <ThemeSwitch />
+  {children}
+</HeroUIProvider>
+```
+
+Where `ThemeSwitch` is a component that allows users to switch themes.

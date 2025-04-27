@@ -1,0 +1,95 @@
+---
+description: 
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# AI Rules for 10xShelter
+
+10xShelter is a central database application for dogs in shelters across Poland. The system aims to facilitate dog adoption from shelters instead of purchasing purebred dogs. It connects two main user groups: people looking to adopt dogs and shelter employees managing dog and shelter data.
+
+Do not write commenct is source code!
+
+## Tech Stack
+
+### Frontend
+- Next.js with App Router
+- TypeScript 5
+- Tailwind 4
+- HeroUI (formerly NextUI) for UI components
+- Yarn as package manager
+
+### Backend
+- Supabase as Backend-as-a-Service
+- PostgreSQL database
+- Built-in user authentication
+
+### Testing
+- Playwright for end-to-end (e2e) tests
+- Vitest for unit tests
+
+### AI Integration
+- OpenRouter.ai for AI model communication
+
+### CI/CD and Hosting
+- Github Actions for CI/CD pipelines
+- DigitalOcean for hosting via Docker image
+
+## Project Structure
+
+When introducing changes to the project, always follow the directory structure below:
+
+- `./src` - source code
+- `./src/app` - Next.js App Router pages and layouts
+- `./src/app/api` - API endpoints
+- `./src/components` - Reusable UI components
+- `./src/components/ui` - Basic UI components based on HeroUI
+- `./src/components/shelter` - Shelter-specific components
+- `./src/components/dog` - Dog-specific components
+- `./src/components/auth` - Authentication components
+- `./src/lib` - Utility functions and services
+- `./src/hooks` - Custom React hooks
+- `./src/types` - TypeScript type definitions
+- `./src/config` - Configuration files
+- `./src/styles` - Global styles
+- `./public` - Static assets
+
+When modifying the directory structure, always update this section.
+
+## Key Features
+
+- Dog information management system (add, edit, view, delete)
+- Simple user account system for shelter employees
+- Shelter profiles with contact information
+- AI integration for matching dogs to potential owners' needs
+- Dog status tracking (available/adopted)
+
+## Coding Practices
+
+### Guidelines for Clean Code
+
+- Use TypeScript for all new code with proper types and interfaces
+- Follow the App Router patterns for Next.js
+- Extract business logic to custom hooks where possible
+- Use React Server Components for data fetching where applicable
+- Implement proper error boundaries using the error.tsx pattern
+- Use loading.tsx for suspense boundaries
+- Handle errors and edge cases at the beginning of functions
+- Use early returns for error conditions to avoid deeply nested if statements
+- Place the happy path last in the function for improved readability
+- Avoid unnecessary else statements; use if-return pattern instead
+- Use HeroUI components for consistent UI
+- Follow Tailwind best practices for styling
+- Implement proper testing with Playwright and Vitest
+- Use await().catch instead try/catch is possible
+
+### Polish Language Support
+
+- The application is primarily for the Polish market
+- All user-facing content should be in Polish
+- Code, comments, and documentation should be in English
+- Error messages for users should be in Polish 

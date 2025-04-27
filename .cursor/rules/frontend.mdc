@@ -1,0 +1,90 @@
+---
+description: 
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+# Frontend Development Rules
+
+## Next.js Best Practices
+
+- Use the App Router for new components and pages
+- Implement proper data fetching with React Server Components where applicable
+- Use static generation for pages that don't require dynamic data
+- Implement proper error boundaries using the error.tsx pattern
+- Use loading.tsx for suspense boundaries
+- Keep page components minimal and focused on layout and data fetching
+- Extract business logic to custom hooks where possible
+
+## TypeScript Standards
+
+- Always use TypeScript for all new code
+- Define proper interfaces and types for all components props
+- Avoid using `any` type - use `unknown` if the type is truly uncertain
+- Use discriminated unions for complex state management
+- Leverage TypeScript's utility types (Pick, Omit, Partial, etc.)
+- Create domain-specific type definitions in separate files
+
+## Component Structure
+
+- Follow atomic design principles (atoms, molecules, organisms, templates, pages)
+- Place shared components in `src/components/` directory
+- Place page-specific components alongside their page files
+- Use named exports for components
+- Create index.ts barrel files for component directories
+- Implement proper component memoization where beneficial
+
+## Tailwind Usage
+
+- Use Tailwind utility classes directly in components
+- Extract repeated patterns to custom components
+- Avoid inline styles unless absolutely necessary
+- Use Tailwind's responsive modifiers (sm:, md:, lg:, etc.) for responsive design
+- Group related utility classes (layout, spacing, typography, etc.)
+- Use Tailwind theme extension for custom values rather than arbitrary values
+
+## State Management
+
+- Use React's built-in state management (useState, useReducer) for local state
+- Consider using React Context for shared state across component trees
+- Implement proper state initialization and updates
+- Use derived state where possible instead of duplicated state
+
+## Performance Optimization
+
+- Implement code splitting with dynamic imports
+- Use proper image optimization with Next.js Image component
+- Implement proper caching strategies
+- Minimize client-side JavaScript where possible
+- Use `useCallback` and `useMemo` appropriately for expensive operations
+- Implement virtualization for long lists
+
+## Accessibility
+
+- Ensure proper semantic HTML structure
+- Implement proper ARIA attributes where needed
+- Ensure keyboard navigation works for all interactive elements
+- Maintain sufficient color contrast according to WCAG guidelines
+- Test with screen readers
+- Support reduced motion preferences
+
+## HeroUI Integration
+
+- Use HeroUI components for common UI patterns
+- Customize HeroUI components using Tailwind when needed
+- Follow HeroUI's composition patterns for complex components
+- Keep up with HeroUI updates and best practices
+
+## Testing
+
+- Write unit tests for utility functions
+- Create component tests for complex components
+- Implement e2e tests for critical user flows using Playwright
+- Use testing-library best practices for component testing
+- Use Vitest for unit and component tests
+
+## Build and Deployment
+
+- Ensure builds are optimized for production
+- Implement proper environment variable handling
+- Use proper Next.js optimizations (ISR, SSG, etc.)
+- Follow the deployment pipeline defined in the project 

@@ -1,0 +1,75 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: src/lib/*.ts,src/app/api/**/*.ts,src/types/*.ts,src/config/*.ts
+alwaysApply: false
+---
+# Backend and Database Guidelines
+
+## Supabase Integration
+
+- Use Supabase for backend services, including authentication, database interactions, and storage.
+- Follow Supabase guidelines for security and performance.
+- Create a centralized Supabase client in `src/lib/supabase.ts` for server-side usage.
+- For client components, use the appropriate Supabase hooks provided by the Supabase Auth Helpers.
+- Use typed database operations with proper TypeScript interfaces representing your database schema.
+
+## Authentication
+
+- Leverage Supabase Auth for shelter employee authentication.
+- Implement proper session management using Supabase Auth Helpers for Next.js.
+- Use server-side authentication checks in API routes and Server Components.
+- Protect admin routes and API endpoints with middleware that verifies user permissions.
+- Store user roles and permissions in the Supabase database for authorization purposes.
+
+## Data Modeling
+
+- Define clear TypeScript interfaces for all database tables in `src/types`.
+- Keep database schema in sync with TypeScript types.
+- Use proper foreign key relationships in the database schema.
+- For the 10xShelter application, key models include:
+  - Users (shelter employees)
+  - Shelters
+  - Dogs
+  - Adoption Status
+
+## Data Validation
+
+- Use Zod schemas to validate all data exchanged with the backend.
+- Create dedicated schema files in `src/lib/schemas`.
+- Perform validation both client-side (for immediate feedback) and server-side (for security).
+- Return standardized error responses when validation fails.
+
+## API Design
+
+- Create RESTful API endpoints in `src/app/api`.
+- Use Next.js App Router API handlers with proper route segmentation.
+- Implement consistent error handling across all API endpoints.
+- Return appropriate HTTP status codes and error messages.
+- Use proper typing for request and response objects.
+
+## Performance Considerations
+
+- Use Supabase RLS (Row Level Security) policies to secure database access.
+- Implement database indexes for frequently queried columns.
+- Use efficient queries and avoid N+1 query problems.
+- Consider using Supabase realtime features for live updates where appropriate.
+- Cache frequently accessed data when applicable.
+
+## AI Integration
+
+- Create a dedicated service in `src/lib/ai-service.ts` for OpenRouter.ai integration.
+- Use environment variables for API keys.
+- Implement proper error handling for AI API calls.
+- Create TypeScript interfaces for AI request and response structures.
+
+## Error Handling
+
+- Create standardized error response formats.
+- Log errors on the server side for debugging and monitoring.
+- Handle common error scenarios gracefully (e.g., database connection issues, authentication failures).
+- Provide user-friendly error messages in Polish to end users. 

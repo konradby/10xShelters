@@ -1,0 +1,14 @@
+---
+description: 
+globs: **/api/**/*.ts
+alwaysApply: false
+---
+Nie używaj try/catch - wybierz await.catch() zamiast tego, aby zmniejszyć indentation.
+
+Nie umieszczaj typów w endpointach.
+
+Nie umieszczaj komenatrzy w kodzie - kod powinien być samodokumentujący się.
+
+Kod powinien być zgodny z dobrymi praktykami podczas tworzenia endpointów.
+
+Nie mutuj (for, while, push)! Używaj map/filter/reduce zamisat tego.
