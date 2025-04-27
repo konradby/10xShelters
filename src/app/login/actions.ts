@@ -1,10 +1,17 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 
-export async function login(formData: FormData): Promise<void> {
+export type LoginState = {
+  error?: string;
+  success?: boolean;
+};
+
+export async function login(
+  prevState: LoginState,
+  formData: FormData
+): Promise<LoginState> {
   const supabase = await createClient();
 
   const data = {
@@ -13,14 +20,16 @@ export async function login(formData: FormData): Promise<void> {
   };
 
   if (!data.email || !data.password) {
-    redirect('/login?error=Email i hasło są wymagane');
+    return { error: 'Email i hasło są wymagane' };
   }
 
-  await supabase.auth.signInWithPassword(data).catch((error) => {
+  const { error } = await supabase.auth.signInWithPassword(data);
+
+  if (error) {
     console.error('Błąd logowania:', error);
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
-  });
+    return { error: 'Nieprawidłowe dane logowania' };
+  }
 
   revalidatePath('/', 'layout');
-  redirect('/');
+  return { success: true };
 }

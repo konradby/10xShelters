@@ -1,10 +1,20 @@
 'use client';
 
-import { login } from './actions';
+import { login, LoginState } from './actions';
 import { Card, CardBody, Button, Input, Form } from '@heroui/react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useFormState } from 'react-dom';
+
+const initialState: LoginState = {};
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [state, formAction] = useFormState(login, initialState);
+
+  if (state.success) {
+    router.push('/');
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-[#F5F7F2]">
       <Card className="w-full max-w-md border-none shadow-lg rounded-xl">
@@ -14,7 +24,7 @@ export default function LoginPage() {
           </h1>
 
           <Form
-            action={login}
+            action={formAction}
             className="space-y-4 w-full"
             validationBehavior="aria"
           >
@@ -68,28 +78,15 @@ export default function LoginPage() {
             </div>
           </Form>
 
-          <div className="mt-4 text-center text-sm">
-            <MessageDisplay />
-          </div>
+          {state.error && (
+            <div className="mt-4 text-center text-sm">
+              <p className="text-red-500" data-e2e-id="login-error">
+                {state.error}
+              </p>
+            </div>
+          )}
         </CardBody>
       </Card>
     </div>
-  );
-}
-
-function MessageDisplay() {
-  const searchParams = useSearchParams();
-  const error = searchParams.get('error');
-  const message = searchParams.get('message');
-
-  return (
-    <>
-      {error && (
-        <p className="text-red-500" data-e2e-id="login-error">
-          {error}
-        </p>
-      )}
-      {message && <p className="text-[#2C4A27]">{message}</p>}
-    </>
   );
 }
