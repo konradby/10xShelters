@@ -1,3 +1,5 @@
+import { DogsService } from '@/app/api/services';
+import { logError } from '@/lib';
 import { AIService } from '@/lib/ai-service';
 import { AIMatchRequestSchema } from '@/lib/schemas/ai-match.schema';
 import { AIMatchResponse } from '@/types';
@@ -5,105 +7,36 @@ import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-
   const body = await request.json();
   const validationResult = AIMatchRequestSchema.safeParse(body);
-  console.log('🚀 ~ POST ~ validationResult:', validationResult);
-
+  
   if (!validationResult.success) {
+    logError('Invalid request body:', { error: validationResult.error });
     return NextResponse.json(
       { error: validationResult.error.errors[0].message },
       { status: 400 }
     );
   }
+  
+  const supabase = await createClient();
+  const dogsService = new DogsService(supabase);
 
-  // Najpierw pobieramy dane psów z bazy danych
-  const { data: dogs, error: dogsError } = await supabase
-    .from('dogs')
-    .select(
-      `
-      id,
-      name,
-      approximate_age,
-      color,
-      description,
-      gender,
-      mixed_breed,
-      weight,
-      status,
-      breed:breeds (
-        id,
-        name,
-        size,
-        coat_type,
-        energy_level,
-        shedding_level,
-        sociability,
-        trainability,
-        description
-      ),
-      shelter:shelters (
-        id,
-        name,
-        city,
-        address,
-        phone,
-        email
-      ),
-      images:dog_images (
-        id,
-        image_path,
-        is_primary
-      ),
-      tags:dog_tags (
-        tag:tags (
-          id,
-          name
-        )
-      )
-      `
-    )
-    .eq('status', 'available')
-    .limit(10);
-
-  if (dogsError) {
-    console.error('Error fetching dogs:', dogsError);
-    return NextResponse.json(
-      { error: 'Wystąpił błąd podczas pobierania danych psów' },
-      { status: 500 }
-    );
-  }
+  const dogs = await dogsService.getDogs(10);
 
   if (!dogs || dogs.length === 0) {
+    logError('No dogs found', { dogs });
+
     return NextResponse.json(
-      { error: 'Nie znaleziono dostępnych psów' },
+      { error: 'No dogs found' },
       { status: 404 }
     );
   }
 
-  // Następnie przekazujemy dane do serwisu AI
   const aiService = new AIService();
   let aiMatches: AIMatchResponse | null = null;
 
-  const transformedDogs = dogs.map((dog) => ({
-    id: dog.id,
-    name: dog.name,
-    breed: dog.breed,
-    size: dog.breed[0]?.size || '',
-    approximate_age: dog.approximate_age,
-    gender: dog.gender,
-    color: dog.color,
-    weight: dog.weight,
-    energy_level: dog.breed[0]?.energy_level,
-    sociability: dog.breed[0]?.sociability,
-    trainability: dog.breed[0]?.trainability,
-    tags: dog.tags.map((t) => ({ tag: { name: t.tag[0].name } })),
-    description: dog.description,
-  }));
-
   try {
-    aiMatches = await aiService.matchDogs(body, transformedDogs);
+    aiMatches = await aiService.matchDogs(body, dogs);
   } catch (error) {
     console.error('Error in AI service:', error);
     return NextResponse.json(
