@@ -1,10 +1,10 @@
-import { MainLayout } from '@/components/layout/MainLayout';
-import { HeroSection } from '@/components/home/HeroSection';
+import { AIMatchProvider } from '@/app/context/AIMatchContext';
 import { AIPromptInput } from '@/components/home/AIPromptInput';
+import { HeroSection } from '@/components/home/HeroSection';
 import { StatisticsSection } from '@/components/home/StatisticsSection';
 import { ContentContainer } from '@/components/layout/ContentContainer';
+import { MainLayout } from '@/components/layout/MainLayout';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
-import { AIMatchProvider } from '@/app/context/AIMatchContext';
 import dynamic from 'next/dynamic';
 
 const DogResultsGrid = dynamic(

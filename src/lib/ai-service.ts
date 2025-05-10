@@ -1,8 +1,53 @@
 import { AIMatchRequestDTO } from '../types/types';
 
+interface CachedData {
+  timestamp: number;
+  data: AIMatchResponse;
+}
+
+interface AIMatchResponse {
+  matches: Array<{
+    dog_id: string;
+    match_percentage: number;
+    reasoning: string;
+  }>;
+}
+
+interface DogForAI {
+  id: string;
+  name: string;
+  breed:
+    | string
+    | Array<{
+        name: string;
+        size: string;
+        energy_level?: number;
+        sociability?: number;
+        trainability?: number;
+      }>;
+  size: string;
+  approximate_age: string | null;
+  gender: string;
+  color: string | null;
+  weight: number | null;
+  energy_level?: number;
+  sociability?: number;
+  trainability?: number;
+  tags: Array<{ tag?: { name: string } }>;
+  description: string | null;
+}
+
+interface OpenRouterResponse {
+  choices: Array<{
+    message: {
+      content: string;
+    };
+  }>;
+}
+
 export class AIService {
   private readonly API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-  private cache = new Map<string, any>();
+  private cache = new Map<string, CachedData>();
   private readonly CACHE_TTL = 3600000;
   private readonly MODEL = 'openai/o3-mini';
 
@@ -14,8 +59,8 @@ export class AIService {
 
   async matchDogs(
     request: AIMatchRequestDTO,
-    availableDogs: any[]
-  ): Promise<any> {
+    availableDogs: DogForAI[]
+  ): Promise<AIMatchResponse> {
     const cacheKey = this.generateCacheKey(request);
     const cachedResult = this.getFromCache(cacheKey);
 
@@ -35,8 +80,8 @@ export class AIService {
 
   private async callAIModel(
     request: AIMatchRequestDTO,
-    dogsData: any[]
-  ): Promise<any> {
+    dogsData: DogForAI[]
+  ): Promise<AIMatchResponse> {
     console.log(`🚀 ~ callAIModel ~ using model: ${this.MODEL}`);
 
     const dogDetailsForAI = dogsData.map((dog) => {
@@ -46,7 +91,7 @@ export class AIService {
           : { name: '', size: '' };
 
       const tags = Array.isArray(dog.tags)
-        ? dog.tags.map((tagEntry: any) => tagEntry.tag?.name).filter(Boolean)
+        ? dog.tags.map((tagEntry) => tagEntry.tag?.name).filter(Boolean)
         : [];
 
       return {
@@ -115,7 +160,7 @@ export class AIService {
         );
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as OpenRouterResponse;
       console.log(
         'Odpowiedź z AI:',
         JSON.stringify(data).slice(0, 200) + '...'
@@ -126,13 +171,13 @@ export class AIService {
         throw new Error('Empty AI response');
       }
 
-      const result = this.processAIResponse(data);
+      const result = await this.processAIResponse(data);
       this.setCache(this.generateCacheKey(request), result);
       return result;
-    } catch (error: any) {
+    } catch (error) {
       console.error(
         'Błąd podczas komunikacji z OpenRouter API:',
-        error.message
+        error instanceof Error ? error.message : 'Unknown error'
       );
       throw error;
     }
@@ -142,7 +187,7 @@ export class AIService {
     return `${request.prompt}-${request.limit}`;
   }
 
-  private getFromCache(key: string): any | null {
+  private getFromCache(key: string): AIMatchResponse | null {
     const cached = this.cache.get(key);
     if (!cached) return null;
 
@@ -155,14 +200,16 @@ export class AIService {
     return data;
   }
 
-  private setCache(key: string, data: any): void {
+  private setCache(key: string, data: AIMatchResponse): void {
     this.cache.set(key, {
       timestamp: Date.now(),
       data,
     });
   }
 
-  private processAIResponse(response: any): any {
+  private async processAIResponse(
+    response: OpenRouterResponse
+  ): Promise<AIMatchResponse> {
     try {
       const content = response.choices[0].message.content;
 
@@ -176,18 +223,18 @@ export class AIService {
         content.slice(0, 200) + (content.length > 200 ? '...' : '')
       );
 
-      return this.extractAndParseJson(content);
+      return await this.extractAndParseJson(content);
     } catch (error) {
       console.error('Błąd podczas przetwarzania odpowiedzi AI:', error);
       throw new Error('Failed to process AI response');
     }
   }
 
-  private async extractAndParseJson(content: string): Promise<any> {
+  private async extractAndParseJson(content: string): Promise<AIMatchResponse> {
     try {
       // Najpierw spróbuj sparsować całą treść jako JSON
       try {
-        const parsedContent = JSON.parse(content);
+        const parsedContent = JSON.parse(content) as AIMatchResponse;
         if (parsedContent.matches && Array.isArray(parsedContent.matches)) {
           console.log('Parsowanie całej treści jako JSON powiodło się');
           return this.validateAndFormatMatches(parsedContent.matches);
@@ -210,11 +257,11 @@ export class AIService {
         throw new Error('Nie znaleziono poprawnego JSON w odpowiedzi');
       }
 
-      let jsonContent = content.substring(jsonStartIndex, jsonEndIndex + 1);
+      const jsonContent = content.substring(jsonStartIndex, jsonEndIndex + 1);
 
       // Próba naprawy potencjalnie obciętego JSON
       try {
-        const parsedContent = JSON.parse(jsonContent);
+        const parsedContent = JSON.parse(jsonContent) as AIMatchResponse;
         if (parsedContent.matches && Array.isArray(parsedContent.matches)) {
           return this.validateAndFormatMatches(parsedContent.matches);
         }
@@ -236,7 +283,7 @@ export class AIService {
             console.log(
               `Udało się wyodrębnić ${extractedMatches.length} częściowych dopasowań`
             );
-            return extractedMatches;
+            return Promise.resolve({ matches: extractedMatches });
           }
         }
       }
@@ -245,85 +292,59 @@ export class AIService {
       console.error('Nie udało się naprawić JSON. Zawartość:', jsonContent);
       throw new Error('Nie udało się sparsować odpowiedzi AI jako JSON');
     } catch (error) {
-      console.error(
-        'Błąd podczas parsowania JSON z odpowiedzi AI:',
-        error,
-        'Treść odpowiedzi:',
-        content
-      );
-      throw new Error('Nie udało się sparsować odpowiedzi AI jako JSON');
+      console.error('Błąd podczas parsowania JSON z odpowiedzi AI:', error);
+      throw error;
     }
   }
 
-  private extractPartialMatches(content: string): any[] {
-    const matches: any[] = [];
-    const regex = /{[^{}]*"dog_id"\s*:\s*"([^"]+)"[^{}]*}/g;
-
+  private extractPartialMatches(content: string): Array<{
+    dog_id: string;
+    match_percentage: number;
+    reasoning: string;
+  }> {
+    const matches: Array<{
+      dog_id: string;
+      match_percentage: number;
+      reasoning: string;
+    }> = [];
+    const regex =
+      /"dog_id"\s*:\s*"([^"]+)",\s*"match_percentage"\s*:\s*(\d+),\s*"reasoning"\s*:\s*"([^"]+)"/g;
     let match;
-    while ((match = regex.exec(content)) !== null) {
-      try {
-        const matchJson = match[0];
-        // Próbujemy sparsować pojedynczy obiekt dopasowania
-        const parsedMatch = JSON.parse(matchJson);
 
-        if (parsedMatch.dog_id) {
-          matches.push({
-            dog_id: parsedMatch.dog_id,
-            match_percentage: parsedMatch.match_percentage || 0,
-            reasoning: parsedMatch.reasoning || '',
-          });
-        }
-      } catch (e) {
-        // Ignorujemy błędy - po prostu kontynuujemy z następnym dopasowaniem
-        console.log(
-          'Nie udało się sparsować pojedynczego dopasowania, próbuję następne'
-        );
-      }
+    while ((match = regex.exec(content)) !== null) {
+      matches.push({
+        dog_id: match[1],
+        match_percentage: parseInt(match[2], 10),
+        reasoning: match[3],
+      });
     }
 
     return matches;
   }
 
-  private validateAndFormatMatches(matches: any[]): any[] {
-    if (!Array.isArray(matches)) {
-      console.error('matches nie jest tablicą:', matches);
-      throw new Error('matches nie jest tablicą');
-    }
-
-    return matches
-      .map((match: any) => {
-        if (!match || typeof match !== 'object') {
-          console.error('Nieprawidłowy element dopasowania:', match);
-          return {
-            dog_id: '',
-            match_percentage: 0,
-            reasoning: 'Nieprawidłowe dopasowanie',
-          };
-        }
-
-        return {
-          dog_id: match.dog_id || '',
-          match_percentage:
-            typeof match.match_percentage === 'number'
-              ? Math.min(100, Math.max(0, match.match_percentage))
-              : 0,
-          reasoning: match.reasoning || '',
-        };
-      })
-      .filter((match: any) => match.dog_id !== '');
+  private validateAndFormatMatches(
+    matches: Array<{
+      dog_id: string;
+      match_percentage: number;
+      reasoning: string;
+    }>
+  ): AIMatchResponse {
+    return {
+      matches: matches.map((match) => ({
+        dog_id: match.dog_id,
+        match_percentage: Math.min(Math.max(match.match_percentage, 0), 100),
+        reasoning: match.reasoning.slice(0, 100),
+      })),
+    };
   }
 
-  private generateFallbackMatches(availableDogs: any[]): any {
-    const maxDogs = Math.min(5, availableDogs.length);
-    const selectedDogs = [...availableDogs]
-      .sort(() => 0.5 - Math.random())
-      .slice(0, maxDogs);
-
-    return selectedDogs.map((dog, index) => ({
-      dog_id: dog.id,
-      match_percentage: 90 - index * 10,
-      reasoning:
-        'To automatyczne dopasowanie zostało wygenerowane, ponieważ system AI nie był w stanie przetworzyć zapytania.',
-    }));
+  private generateFallbackMatches(availableDogs: DogForAI[]): AIMatchResponse {
+    return {
+      matches: availableDogs.slice(0, 5).map((dog) => ({
+        dog_id: dog.id,
+        match_percentage: Math.floor(Math.random() * 30) + 70,
+        reasoning: 'Dopasowanie na podstawie dostępnych danych',
+      })),
+    };
   }
 }
