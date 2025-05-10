@@ -1,14 +1,3 @@
-export interface DogImage {
-  id: string;
-  image_path: string;
-  is_primary: boolean;
-}
-
-export interface Tag {
-  id: string;
-  name: string;
-}
-
 export interface TagEntry {
   tag: {
     id: string;
@@ -16,29 +5,58 @@ export interface TagEntry {
   }[];
 }
 
+export type Tag = {
+  id: string;
+  name: string;
+}
+
+export type DogTag = {
+  tag: Tag;
+}
+
+export type DogImage = {
+  id: string;
+  image_path: string;
+  is_primary: boolean;
+}
+
+export type Shelter = {
+  id: string;
+  name: string;
+  city: string;
+  address: string;
+  phone: string;
+  email: string;
+}
+
+export type Breed = {
+  id: string;
+  name: string;
+  size: string;
+  coat_type: string;
+  energy_level: number;
+  shedding_level: number;
+  sociability: number;
+  trainability: number;
+  description: string;
+}
+
 export type DogDetails = {
   id: string;
   name: string;
-  breed:
-    | string
-    | Array<{
-        name: string;
-        size: string;
-        energy_level?: number;
-        sociability?: number;
-        trainability?: number;
-      }>;
+  approximate_age: number;
+  color: string;
+  description: string;
+  gender: 'male' | 'female';
+  mixed_breed: boolean;
+  weight: number;
+  status: string;
   size: string;
-  approximate_age: string | null;
-  gender: string;
-  color: string | null;
-  weight: number | null;
-  energy_level?: number;
-  sociability?: number;
-  trainability?: number;
-  tags: Array<{ tag?: { name: string } }>;
-  description: string | null;
-};
+  breed: Breed;
+  shelter: Shelter;
+  images: DogImage[];
+  tags: DogTag[];
+}
 
 export type DogListItem = {
   id: string;
