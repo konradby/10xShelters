@@ -1,7 +1,7 @@
 import {
   AIMatchResponse,
   CachedData,
-  DogDetails,
+  DogDetailsDTO,
   OpenRouterResponse,
 } from '@/types';
 import SHA256 from 'crypto-js/sha256';
@@ -22,7 +22,7 @@ export class AIService {
 
   async matchDogs(
     request: AIMatchRequestDTO,
-    availableDogs: DogDetails[]
+    availableDogs: DogDetailsDTO[]
   ): Promise<AIMatchResponse> {
     const cacheKey = this.generateCacheKey(request);
     const cachedResult = this.getFromCache(cacheKey);
@@ -44,7 +44,7 @@ export class AIService {
 
   private async callAIModel(
     request: AIMatchRequestDTO,
-    dogsData: DogDetails[]
+    dogsData: DogDetailsDTO[]
   ): Promise<AIMatchResponse> {
     logInfo(`🚀 ~ callAIModel ~ using model: ${this.MODEL}`);
 
@@ -249,7 +249,7 @@ export class AIService {
   }
 
   private generateFallbackMatches(
-    availableDogs: DogDetails[]
+    availableDogs: DogDetailsDTO[]
   ): AIMatchResponse {
     return {
       matches: availableDogs.slice(0, 5).map((dog) => ({

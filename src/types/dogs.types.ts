@@ -8,17 +8,17 @@ export interface TagEntry {
 export type Tag = {
   id: string;
   name: string;
-}
+};
 
 export type DogTag = {
   tag: Tag;
-}
+};
 
 export type DogImage = {
   id: string;
   image_path: string;
   is_primary: boolean;
-}
+};
 
 export type Shelter = {
   id: string;
@@ -27,7 +27,7 @@ export type Shelter = {
   address: string;
   phone: string;
   email: string;
-}
+};
 
 export type Breed = {
   id: string;
@@ -39,9 +39,9 @@ export type Breed = {
   sociability: number;
   trainability: number;
   description: string;
-}
+};
 
-export type DogDetails = {
+export type DogDetailsDTO = {
   id: string;
   name: string;
   approximate_age: number;
@@ -56,7 +56,7 @@ export type DogDetails = {
   shelter: Shelter;
   images: DogImage[];
   tags: DogTag[];
-}
+};
 
 export type DogListItem = {
   id: string;

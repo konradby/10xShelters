@@ -1,5 +1,5 @@
 import { logError } from '@/lib';
-import { DogDetails } from '@/types';
+import { DogDetailsDTO } from '@/types';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const dogDetailsQuery = `
@@ -47,7 +47,7 @@ const dogDetailsQuery = `
 export class DogsService {
   constructor(private readonly supabase: SupabaseClient) {}
 
-  async getDogById(id: string): Promise<DogDetails | null> {
+  async getDogById(id: string): Promise<DogDetailsDTO | null> {
     const { data, error } = await this.supabase
       .from('dogs')
       .select(dogDetailsQuery)
@@ -59,10 +59,10 @@ export class DogsService {
       return null;
     }
 
-    return data as unknown as DogDetails;
+    return data as unknown as DogDetailsDTO;
   }
 
-  async getDogs(limit: number = 10): Promise<DogDetails[]> {
+  async getDogs(limit: number = 10): Promise<DogDetailsDTO[]> {
     const { data, error } = await this.supabase
       .from('dogs')
       .select(dogDetailsQuery)
@@ -74,6 +74,6 @@ export class DogsService {
       return [];
     }
 
-    return data as unknown as DogDetails[];
+    return data as unknown as DogDetailsDTO[];
   }
 }
