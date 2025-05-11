@@ -6,12 +6,12 @@ import { DogDetailsDTO } from '@/types';
 import { logError } from '@/lib';
 import { DogDetails } from './components/DogDetails';
 
-interface PageProps {
-  params: {
+type PageProps = {
+  params: Promise<{
     id: string;
-  };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
+  }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
 async function getDogData(id: string): Promise<DogDetailsDTO | null> {
   const response = await fetch(`/api/public/dogs/${id}`).catch((error) => {
@@ -30,7 +30,8 @@ async function getDogData(id: string): Promise<DogDetailsDTO | null> {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const data = await getDogData(params.id);
+  const resolvedParams = await params;
+  const data = await getDogData(resolvedParams.id);
 
   if (!data) {
     return {
@@ -47,7 +48,8 @@ export async function generateMetadata({
 }
 
 export default async function DogPage({ params }: PageProps) {
-  const dogData = await getDogData(params.id);
+  const resolvedParams = await params;
+  const dogData = await getDogData(resolvedParams.id);
 
   if (!dogData) {
     notFound();
