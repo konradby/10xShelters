@@ -164,21 +164,22 @@ export type AIMatchRequestDTO = {
   limit: number;
 };
 
-export type AIMatchResponseDTO = {
-  matches: Array<{
-    dog_id: UUID;
-    match_percentage: number;
-    dog: {
-      id: UUID;
+export type AiMatchDogDetails = {
+  dog_id: UUID;
+  match_percentage: number;
+  reasoning: string;
+  dog_details: {
+    id: UUID;
+    name: string;
+    breed: {
       name: string;
-      breed: {
-        name: string;
-        size: DogSize;
-      };
-      primary_image: string;
+      size: DogSize;
     };
-  }>;
+    primary_image: string;
+  };
 };
+
+export type AIMatchResponseDTO = AiMatchDogDetails[];
 
 // Command Models
 export type RegisterUserCommand = RegisterUserDTO;

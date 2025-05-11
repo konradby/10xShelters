@@ -1,32 +1,11 @@
 import { AIMatchProvider } from '@/app/context/AIMatchContext';
 import { AIPromptInput } from '@/components/home/AIPromptInput';
+import { DogResultsGrid } from '@/components/home/DogResultsGrid';
 import { HeroSection } from '@/components/home/HeroSection';
 import { StatisticsSection } from '@/components/home/StatisticsSection';
 import { ContentContainer } from '@/components/layout/ContentContainer';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
-import dynamic from 'next/dynamic';
-
-const DogResultsGrid = dynamic(
-  () =>
-    import('@/components/home/DogResultsGrid').then(
-      (mod) => mod.DogResultsGrid
-    ),
-  {
-    loading: () => (
-      <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
-    ),
-  }
-);
-
-const LoginPrompt = dynamic(
-  () => import('@/components/home/LoginPrompt').then((mod) => mod.LoginPrompt),
-  {
-    loading: () => (
-      <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
-    ),
-  }
-);
 
 export default function HomePage() {
   return (

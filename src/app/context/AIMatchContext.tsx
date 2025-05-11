@@ -3,7 +3,6 @@
 import { logError, logInfo } from '@/lib';
 import { dogsMatchesMock } from '@/mocks/dogs';
 import { AIMatchRequestDTO, AIMatchResponseDTO } from '@/types/types';
-import { DogCardViewModel } from '@/types/viewModels.types';
 import {
   createContext,
   ReactNode,
@@ -16,9 +15,12 @@ interface AIMatchContextType {
   prompt: string;
   setPrompt: (prompt: string) => void;
   isLoading: boolean;
-  results: DogCardViewModel[];
+  results: AIMatchResponseDTO;
   error: string | null;
-  searchDogs: (searchPrompt: string, limit?: number) => Promise<void>;
+  searchDogs: (
+    searchPrompt: string,
+    limit?: number
+  ) => Promise<AIMatchResponseDTO>;
 }
 
 const AIMatchContext = createContext<AIMatchContextType | null>(null);
@@ -26,36 +28,45 @@ const AIMatchContext = createContext<AIMatchContextType | null>(null);
 export function AIMatchProvider({ children }: { children: ReactNode }) {
   const [prompt, setPrompt] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [results, setResults] = useState<DogCardViewModel[]>([]);
+  const [results, setResults] = useState<AIMatchResponseDTO>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (dogsMatchesMock.matches && dogsMatchesMock.matches.length > 0) {
-      const dogCards: DogCardViewModel[] = dogsMatchesMock.matches.map(
+      const result: AIMatchResponseDTO = dogsMatchesMock.matches.map(
         (match) => {
           return {
-            id: match.dog.id,
-            name: match.dog.name,
-            breedName: match.dog.breed.name || 'Mieszaniec',
-            size: match.dog.breed.size,
-            imageUrl: match.dog.primary_image,
-            matchPercentage: match.match_percentage,
+            dog_id: match.dog.id,
+            match_percentage: match.match_percentage,
+            reasoning: match.reasoning,
+            dog_details: {
+              id: match.dog.id,
+              name: match.dog.name,
+              breed: {
+                name: match.dog.breed.name || 'Mieszaniec',
+                size: match.dog.breed.size,
+              },
+              primary_image: match.dog.primary_image,
+            },
           };
         }
       );
-      setResults(dogCards);
+      setResults(result);
     }
   }, []);
 
-  const searchDogs = async (searchPrompt: string, limit: number = 4) => {
+  const searchDogs = async (
+    searchPrompt: string,
+    limit: number = 4
+  ): Promise<AIMatchResponseDTO> => {
     if (searchPrompt.length < 10) {
       setError('Opis musi zawierać co najmniej 10 znaków');
-      return;
+      return [];
     }
 
     if (searchPrompt.length > 1000) {
       setError('Opis nie może przekraczać 1000 znaków');
-      return;
+      return [];
     }
 
     setIsLoading(true);
@@ -81,35 +92,27 @@ export function AIMatchProvider({ children }: { children: ReactNode }) {
     if (!response) {
       setError('Wystąpił błąd podczas wyszukiwania. Spróbuj ponownie później.');
       setIsLoading(false);
-      return;
+      return [];
     }
 
     if (response.status === 401) {
       setError('Aby korzystać z wyszukiwania, zaloguj się do systemu');
       setIsLoading(false);
-      return;
+      return [];
     }
 
     const data: AIMatchResponseDTO = await response.json();
     logInfo('Otrzymane dane z API:', { data });
 
-    if (!data.matches || data.matches.length === 0) {
+    if (!data || data.length === 0) {
       setError('Nie znaleziono psów pasujących do Twoich kryteriów');
-      return;
+      return [];
     }
 
-    const dogCards: DogCardViewModel[] = data.matches.map((match) => ({
-      id: match.dog_id,
-      matchPercentage: match.match_percentage,
-      name: match.dog.name,
-      breedName: match.dog.breed.name,
-      size: match.dog.breed.size,
-      imageUrl: match.dog.primary_image,
-    }));
-
-    logInfo('Przetworzone karty psów:', { dogCards });
-    setResults(dogCards);
+    logInfo('Przetworzone karty psów:', { data });
+    setResults(data);
     setIsLoading(false);
+    return data;
   };
 
   const contextValue = {
