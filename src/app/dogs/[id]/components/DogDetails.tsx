@@ -1,5 +1,6 @@
 'use client';
 
+import { DogDetailsDTO } from '@/types';
 import { ODogGender } from '@/types/types';
 import { Button, Card, CardBody, CardHeader, Chip } from '@heroui/react';
 import Image from 'next/image';
@@ -7,50 +8,11 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 interface DogDetailsProps {
-  dog: {
-    id: string;
-    name: string;
-    approximate_age: string | null;
-    color: string | null;
-    description: string | null;
-    gender: string;
-    mixed_breed: boolean;
-    weight: number | null;
-    status: string;
-    breed: {
-      id: string;
-      name: string;
-      size: string;
-      coat_type: string;
-      shedding_level: number;
-      energy_level?: number;
-      sociability?: number;
-      trainability?: number;
-      description?: string;
-    };
-    shelter: {
-      id: string;
-      name: string;
-      city: string;
-      address: string;
-      phone: string;
-      email: string;
-    } | null;
-    primary_image: string;
-    images: Array<{
-      id: string;
-      url: string;
-      is_primary: boolean;
-    }>;
-    tags: Array<{
-      id: string;
-      name: string;
-    }>;
-  };
+  dog: DogDetailsDTO;
 }
 
 export function DogDetails({ dog }: DogDetailsProps) {
-  const [selectedImage, setSelectedImage] = useState(dog.primary_image);
+  const [selectedImage, setSelectedImage] = useState(dog.images[0].image_path);
 
   const handleImageClick = (url: string) => {
     setSelectedImage(url);
@@ -83,15 +45,15 @@ export function DogDetails({ dog }: DogDetailsProps) {
                   <div
                     key={image.id}
                     className={`w-20 h-20 rounded-xl overflow-hidden cursor-pointer border-2 ${
-                      selectedImage === image.url
+                      selectedImage === image.image_path
                         ? 'border-[#4A6741] shadow-md'
                         : 'border-transparent'
                     }`}
-                    onClick={() => handleImageClick(image.url)}
+                    onClick={() => handleImageClick(image.image_path)}
                   >
                     <div className="relative w-full h-full">
                       <Image
-                        src={image.url}
+                        src={image.image_path}
                         alt={dog.name}
                         fill
                         className="object-cover"
@@ -133,11 +95,11 @@ export function DogDetails({ dog }: DogDetailsProps) {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {dog.tags.map((tag) => (
                     <Chip
-                      key={tag.id}
+                      key={tag.tag.id}
                       className="bg-[#D1DBC8] text-[#4A6741] rounded-lg"
                       size="sm"
                     >
-                      {tag.name}
+                      {tag.tag.name}
                     </Chip>
                   ))}
                 </div>

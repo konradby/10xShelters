@@ -1,49 +1,12 @@
+import {
+  AIMatchResponse,
+  CachedData,
+  DogDetailsDTO,
+  OpenRouterResponse,
+} from '@/types';
+import SHA256 from 'crypto-js/sha256';
 import { AIMatchRequestDTO } from '../types/types';
-
-interface CachedData {
-  timestamp: number;
-  data: AIMatchResponse;
-}
-
-interface AIMatchResponse {
-  matches: Array<{
-    dog_id: string;
-    match_percentage: number;
-    reasoning: string;
-  }>;
-}
-
-interface DogForAI {
-  id: string;
-  name: string;
-  breed:
-    | string
-    | Array<{
-        name: string;
-        size: string;
-        energy_level?: number;
-        sociability?: number;
-        trainability?: number;
-      }>;
-  size: string;
-  approximate_age: string | null;
-  gender: string;
-  color: string | null;
-  weight: number | null;
-  energy_level?: number;
-  sociability?: number;
-  trainability?: number;
-  tags: Array<{ tag?: { name: string } }>;
-  description: string | null;
-}
-
-interface OpenRouterResponse {
-  choices: Array<{
-    message: {
-      content: string;
-    };
-  }>;
-}
+import { logError, logInfo } from './logger.utils';
 
 export class AIService {
   private readonly API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -59,7 +22,7 @@ export class AIService {
 
   async matchDogs(
     request: AIMatchRequestDTO,
-    availableDogs: DogForAI[]
+    availableDogs: DogDetailsDTO[]
   ): Promise<AIMatchResponse> {
     const cacheKey = this.generateCacheKey(request);
     const cachedResult = this.getFromCache(cacheKey);
@@ -67,7 +30,8 @@ export class AIService {
     if (cachedResult) return cachedResult;
 
     if (!availableDogs || availableDogs.length === 0) {
-      throw new Error('Brak dostępnych psów do dopasowania');
+      logError('No available dogs, using fallback', { availableDogs });
+      return { matches: [] };
     }
 
     try {
@@ -80,111 +44,64 @@ export class AIService {
 
   private async callAIModel(
     request: AIMatchRequestDTO,
-    dogsData: DogForAI[]
+    dogsData: DogDetailsDTO[]
   ): Promise<AIMatchResponse> {
-    console.log(`🚀 ~ callAIModel ~ using model: ${this.MODEL}`);
+    logInfo(`🚀 ~ callAIModel ~ using model: ${this.MODEL}`);
 
-    const dogDetailsForAI = dogsData.map((dog) => {
-      const breedInfo =
-        Array.isArray(dog.breed) && dog.breed.length > 0
-          ? dog.breed[0]
-          : { name: '', size: '' };
+    const stringifiedDogs = JSON.stringify(dogsData);
 
-      const tags = Array.isArray(dog.tags)
-        ? dog.tags.map((tagEntry) => tagEntry.tag?.name).filter(Boolean)
-        : [];
+    logInfo('Dogs sent to AI');
 
-      return {
-        id: dog.id,
-        name: dog.name,
-        breed: breedInfo.name,
-        size: breedInfo.size,
-        approximate_age: dog.approximate_age,
-        gender: dog.gender,
-        color: dog.color,
-        weight: dog.weight,
-        energy_level: breedInfo.energy_level,
-        sociability: breedInfo.sociability,
-        trainability: breedInfo.trainability,
-        tags,
-        description: dog.description,
-      };
+    const systemPrompt = `Jesteś ekspertem w dopasowywaniu psów do preferencji użytkowników. Analizujesz opis preferencji i listę dostępnych psów, a następnie zwracasz listę psów najlepiej pasujących do kryteriów. WAŻNE: Twoja odpowiedź MUSI zawierać WYŁĄCZNIE obiekt JSON zgodny z tym schematem: { "matches": [ { "dog_id": "id_psa", "match_percentage": liczba_od_0_do_100, "reasoning": "krótkie_uzasadnienie" } ] }. Nie dodawaj żadnego tekstu przed lub po obiekcie JSON. Ograniczaj długość uzasadnienia do maksymalnie 100 znaków.`;
+
+    const response = await fetch(this.API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://10xshelter.pl',
+        'X-Title': '10xShelter',
+      },
+      body: JSON.stringify({
+        model: this.MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: `Preferencje użytkownika: ${request.prompt}\n\nDostępne psy: ${stringifiedDogs}`,
+          },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.5,
+        max_tokens: 2500,
+      }),
+    }).catch((error) => {
+      logError('Error in AI service, fetch failed:', { error });
     });
 
-    // Ogranicz liczbę psów wysyłanych do API - maksymalnie 5
-    const limitedDogs = dogDetailsForAI.slice(0, 5);
-    console.log(
-      'Dane psów wysyłane do AI:',
-      JSON.stringify(limitedDogs).slice(0, 200) + '...'
-    );
-
-    try {
-      const systemPrompt = `Jesteś ekspertem w dopasowywaniu psów do preferencji użytkowników. Analizujesz opis preferencji i listę dostępnych psów, a następnie zwracasz listę psów najlepiej pasujących do kryteriów. WAŻNE: Twoja odpowiedź MUSI zawierać WYŁĄCZNIE obiekt JSON zgodny z tym schematem: { "matches": [ { "dog_id": "id_psa", "match_percentage": liczba_od_0_do_100, "reasoning": "krótkie_uzasadnienie" } ] }. Nie dodawaj żadnego tekstu przed lub po obiekcie JSON. Ograniczaj długość uzasadnienia do maksymalnie 100 znaków.`;
-
-      const response = await fetch(this.API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'https://10xshelter.pl',
-          'X-Title': '10xShelter',
-        },
-        body: JSON.stringify({
-          model: this.MODEL,
-          messages: [
-            {
-              role: 'system',
-              content: systemPrompt,
-            },
-            {
-              role: 'user',
-              content: `Preferencje użytkownika: ${request.prompt}\n\nDostępne psy: ${JSON.stringify(limitedDogs)}`,
-            },
-          ],
-          response_format: { type: 'json_object' },
-          temperature: 0.5,
-          max_tokens: 2500,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response
-          .text()
-          .catch(() => 'Nie udało się pobrać treści błędu');
-        console.error(
-          `Błąd API: ${response.status} - ${response.statusText}`,
-          errorText
-        );
-        throw new Error(
-          `AI service returned ${response.status}: ${response.statusText}`
-        );
-      }
-
-      const data = (await response.json()) as OpenRouterResponse;
-      console.log(
-        'Odpowiedź z AI:',
-        JSON.stringify(data).slice(0, 200) + '...'
-      );
-
-      if (!data.choices?.[0]?.message?.content) {
-        console.error('Brak treści w odpowiedzi API:', data);
-        throw new Error('Empty AI response');
-      }
-
-      const result = await this.processAIResponse(data);
-      this.setCache(this.generateCacheKey(request), result);
-      return result;
-    } catch (error) {
-      console.error(
-        'Błąd podczas komunikacji z OpenRouter API:',
-        error instanceof Error ? error.message : 'Unknown error'
-      );
-      throw error;
+    if (!response?.ok) {
+      logError('Error in AI service, using fallback:', { response });
+      return this.generateFallbackMatches(dogsData);
     }
+
+    const data = (await response.json()) as OpenRouterResponse;
+
+    if (!data.choices?.[0]?.message?.content) {
+      logError('Empty AI response:', { data });
+      return this.generateFallbackMatches(dogsData);
+    }
+
+    const result = await this.processAIResponse(data);
+    this.setCache(this.generateCacheKey(request), result);
+    return result;
   }
 
   private generateCacheKey(request: AIMatchRequestDTO): string {
-    return `${request.prompt}-${request.limit}`;
+    const inputString = `${request.prompt}-${request.limit}`;
+    return SHA256(inputString).toString();
   }
 
   private getFromCache(key: string): AIMatchResponse | null {
@@ -210,91 +127,84 @@ export class AIService {
   private async processAIResponse(
     response: OpenRouterResponse
   ): Promise<AIMatchResponse> {
-    try {
-      const content = response.choices[0].message.content;
-
-      if (!content || typeof content !== 'string') {
-        console.error('Nieprawidłowy format odpowiedzi AI:', content);
-        throw new Error('Invalid AI response format');
-      }
-
-      console.log(
-        'Otrzymana treść z AI:',
-        content.slice(0, 200) + (content.length > 200 ? '...' : '')
-      );
-
-      return await this.extractAndParseJson(content);
-    } catch (error) {
-      console.error('Błąd podczas przetwarzania odpowiedzi AI:', error);
-      throw new Error('Failed to process AI response');
+    if (!response.choices?.[0]?.message?.content) {
+      logError('Empty AI response:', { response });
+      return { matches: [] };
     }
+
+    const content = response.choices[0].message.content;
+
+    if (!content || typeof content !== 'string') {
+      logError('Invalid AI response format:', { content });
+      return { matches: [] };
+    }
+
+    return await this.extractAndParseJson(content);
   }
 
   private async extractAndParseJson(content: string): Promise<AIMatchResponse> {
+    // Najpierw spróbuj sparsować całą treść jako JSON
     try {
-      // Najpierw spróbuj sparsować całą treść jako JSON
-      try {
-        const parsedContent = JSON.parse(content) as AIMatchResponse;
-        if (parsedContent.matches && Array.isArray(parsedContent.matches)) {
-          console.log('Parsowanie całej treści jako JSON powiodło się');
-          return this.validateAndFormatMatches(parsedContent.matches);
-        }
-      } catch (e) {
-        console.log(
-          'Całość treści nie jest poprawnym JSON, próbuję wyodrębnić JSON...'
-        );
+      const parsedContent = JSON.parse(content) as AIMatchResponse;
+      if (parsedContent.matches && Array.isArray(parsedContent.matches)) {
+        logInfo('Parsowanie całej treści jako JSON powiodło się');
+        return this.validateAndFormatMatches(parsedContent.matches);
       }
-
-      // Jeśli powyższe nie zadziałało, próbuj znaleźć JSON w tekście
-      const jsonStartIndex = content.indexOf('{');
-      const jsonEndIndex = content.lastIndexOf('}');
-
-      if (
-        jsonStartIndex === -1 ||
-        jsonEndIndex === -1 ||
-        jsonEndIndex <= jsonStartIndex
-      ) {
-        throw new Error('Nie znaleziono poprawnego JSON w odpowiedzi');
-      }
-
-      const jsonContent = content.substring(jsonStartIndex, jsonEndIndex + 1);
-
-      // Próba naprawy potencjalnie obciętego JSON
-      try {
-        const parsedContent = JSON.parse(jsonContent) as AIMatchResponse;
-        if (parsedContent.matches && Array.isArray(parsedContent.matches)) {
-          return this.validateAndFormatMatches(parsedContent.matches);
-        }
-      } catch (parseError) {
-        console.log(
-          'Wyodrębniony JSON jest niepoprawny, próbuję naprawić obcięty JSON...'
-        );
-
-        // Szukamy dosłownie struktury JSON "matches"
-        const matchesStartIndex = content.indexOf('"matches"');
-        const bracketOpenIndex = content.indexOf('[', matchesStartIndex);
-
-        if (matchesStartIndex !== -1 && bracketOpenIndex !== -1) {
-          // Próba wyodrębnienia poszczególnych obiektów dopasowań
-          const matchesContent = content.substring(bracketOpenIndex);
-          const extractedMatches = this.extractPartialMatches(matchesContent);
-
-          if (extractedMatches.length > 0) {
-            console.log(
-              `Udało się wyodrębnić ${extractedMatches.length} częściowych dopasowań`
-            );
-            return Promise.resolve({ matches: extractedMatches });
-          }
-        }
-      }
-
-      // Jeśli doszliśmy tutaj, JSON jest uszkodzony i nie da się go naprawić
-      console.error('Nie udało się naprawić JSON. Zawartość:', jsonContent);
-      throw new Error('Nie udało się sparsować odpowiedzi AI jako JSON');
-    } catch (error) {
-      console.error('Błąd podczas parsowania JSON z odpowiedzi AI:', error);
-      throw error;
+    } catch (e) {
+      logError(
+        'Całość treści nie jest poprawnym JSON, próbuję wyodrębnić JSON...',
+        { e }
+      );
     }
+
+    // Jeśli powyższe nie zadziałało, próbuj znaleźć JSON w tekście
+    const jsonStartIndex = content.indexOf('{');
+    const jsonEndIndex = content.lastIndexOf('}');
+
+    if (
+      jsonStartIndex === -1 ||
+      jsonEndIndex === -1 ||
+      jsonEndIndex <= jsonStartIndex
+    ) {
+      logError('Nie znaleziono poprawnego JSON w odpowiedzi');
+      return { matches: [] };
+    }
+
+    const jsonContent = content.substring(jsonStartIndex, jsonEndIndex + 1);
+
+    // Próba naprawy potencjalnie obciętego JSON
+    try {
+      const parsedContent = JSON.parse(jsonContent) as AIMatchResponse;
+      if (parsedContent.matches && Array.isArray(parsedContent.matches)) {
+        return this.validateAndFormatMatches(parsedContent.matches);
+      }
+    } catch (parseError) {
+      logError(
+        'Wyodrębniony JSON jest niepoprawny, próbuję naprawić obcięty JSON...',
+        { parseError }
+      );
+
+      // Szukamy dosłownie struktury JSON "matches"
+      const matchesStartIndex = content.indexOf('"matches"');
+      const bracketOpenIndex = content.indexOf('[', matchesStartIndex);
+
+      if (matchesStartIndex !== -1 && bracketOpenIndex !== -1) {
+        // Próba wyodrębnienia poszczególnych obiektów dopasowań
+        const matchesContent = content.substring(bracketOpenIndex);
+        const extractedMatches = this.extractPartialMatches(matchesContent);
+
+        if (extractedMatches.length > 0) {
+          logInfo(
+            `Udało się wyodrębnić ${extractedMatches.length} częściowych dopasowań`
+          );
+          return { matches: extractedMatches };
+        }
+      }
+    }
+
+    // Jeśli doszliśmy tutaj, JSON jest uszkodzony i nie da się go naprawić
+    logError('Nie udało się naprawić JSON. Zawartość:', { jsonContent });
+    return { matches: [] };
   }
 
   private extractPartialMatches(content: string): Array<{
@@ -338,7 +248,9 @@ export class AIService {
     };
   }
 
-  private generateFallbackMatches(availableDogs: DogForAI[]): AIMatchResponse {
+  private generateFallbackMatches(
+    availableDogs: DogDetailsDTO[]
+  ): AIMatchResponse {
     return {
       matches: availableDogs.slice(0, 5).map((dog) => ({
         dog_id: dog.id,

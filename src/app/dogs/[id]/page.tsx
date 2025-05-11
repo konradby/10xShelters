@@ -1,18 +1,37 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { createClient } from '@/utils/supabase/server';
 import { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { DogDetailsDTO } from '@/types';
+import { logError } from '@/lib';
 import { DogDetails } from './components/DogDetails';
 
-type Props = {
-  params: {
+type PageProps = {
+  params: Promise<{
     id: string;
-  };
+  }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const data = await getDogData(params.id);
+async function getDogData(id: string): Promise<DogDetailsDTO | null> {
+  const response = await fetch(`/api/public/dogs/${id}`).catch((error) => {
+    logError('Error fetching dog details:', { error });
+  });
+
+  if (!response) {
+    return null;
+  }
+
+  const data = await response.json();
+
+  return data;
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const data = await getDogData(resolvedParams.id);
 
   if (!data) {
     return {
@@ -28,142 +47,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-type ShelterInfo = {
-  id: string;
-  name: string;
-  city: string;
-  address: string;
-  phone: string;
-  email: string;
-};
-
-async function getDogData(id: string) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('dogs')
-    .select(
-      `
-      id,
-      name,
-      approximate_age,
-      color,
-      description,
-      gender,
-      mixed_breed,
-      weight,
-      status,
-      breed:breeds (
-        id,
-        name,
-        size,
-        coat_type,
-        energy_level,
-        shedding_level,
-        sociability,
-        trainability,
-        description
-      ),
-      shelter:shelters (
-        id,
-        name,
-        city,
-        address,
-        phone,
-        email
-      ),
-      images:dog_images (
-        id,
-        image_path,
-        is_primary
-      ),
-      tags:dog_tags (
-        tag:tags (
-          id,
-          name
-        )
-      )
-    `
-    )
-    .eq('id', id)
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  const breedInfo =
-    Array.isArray(data.breed) && data.breed.length > 0
-      ? data.breed[0]
-      : { name: '', size: '' };
-
-  const primaryImage = Array.isArray(data.images)
-    ? data.images.find((img: any) => img.is_primary)?.image_path ||
-      data.images[0]?.image_path ||
-      '/images/dog-placeholder.jpg'
-    : '/images/dog-placeholder.jpg';
-
-  const dogTags = Array.isArray(data.tags)
-    ? data.tags.map((tagEntry: any) => tagEntry.tag).filter(Boolean)
-    : [];
-
-  let shelterInfo = null;
-  if (data.shelter) {
-    if (Array.isArray(data.shelter) && data.shelter.length > 0) {
-      shelterInfo = data.shelter[0] as ShelterInfo;
-    } else {
-      shelterInfo = data.shelter as unknown as ShelterInfo;
-    }
-  }
-
-  return {
-    id: data.id,
-    name: data.name,
-    approximate_age: data.approximate_age,
-    color: data.color,
-    description: data.description,
-    gender: data.gender,
-    mixed_breed: data.mixed_breed,
-    weight: data.weight,
-    status: data.status,
-    breed: {
-      id: 'id' in breedInfo ? breedInfo.id : undefined,
-      name: breedInfo.name,
-      size: breedInfo.size,
-      coat_type: 'coat_type' in breedInfo ? breedInfo.coat_type : undefined,
-      energy_level:
-        'energy_level' in breedInfo ? breedInfo.energy_level : undefined,
-      shedding_level:
-        'shedding_level' in breedInfo ? breedInfo.shedding_level : undefined,
-      sociability:
-        'sociability' in breedInfo ? breedInfo.sociability : undefined,
-      trainability:
-        'trainability' in breedInfo ? breedInfo.trainability : undefined,
-      description:
-        'description' in breedInfo ? breedInfo.description : undefined,
-    },
-    shelter: shelterInfo && {
-      id: shelterInfo.id,
-      name: shelterInfo.name,
-      city: shelterInfo.city,
-      address: shelterInfo.address,
-      phone: shelterInfo.phone,
-      email: shelterInfo.email,
-    },
-    primary_image: primaryImage,
-    images: Array.isArray(data.images)
-      ? data.images.map((img: any) => ({
-          id: img.id,
-          url: img.image_path,
-          is_primary: img.is_primary,
-        }))
-      : [],
-    tags: dogTags,
-  };
-}
-
-export default async function DogPage({ params }: Props) {
-  const dogData = await getDogData(params.id);
+export default async function DogPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const dogData = await getDogData(resolvedParams.id);
 
   if (!dogData) {
     notFound();
@@ -176,7 +62,7 @@ export default async function DogPage({ params }: Props) {
         {/* Zdjęcie w tle */}
         <div className="absolute inset-0 z-0">
           <Image
-            src={dogData.primary_image}
+            src={dogData.images[0].image_path}
             alt={`Zdjęcie psa ${dogData.name}`}
             fill
             className="object-cover"
