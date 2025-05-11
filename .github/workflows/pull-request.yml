@@ -30,6 +30,10 @@ jobs:
     name: Unit Tests
     needs: lint
     runs-on: ubuntu-latest
+    environment: TEST
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,10 +59,13 @@ jobs:
     name: E2E Tests
     needs: lint
     runs-on: ubuntu-latest
+    environment: TEST
     env:
-      NODE_ENV: integration
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      E2E_USERNAME_UID: ${{ secrets.E2E_USERNAME_UID }}
+      E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 

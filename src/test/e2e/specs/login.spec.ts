@@ -1,14 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
 
 test.describe('Logowanie', () => {
   let loginPage: LoginPage;
-  let homePage: HomePage;
 
   test.beforeEach(async ({ page }) => {
     loginPage = new LoginPage(page);
-    homePage = new HomePage(page);
     await loginPage.navigate();
   });
 

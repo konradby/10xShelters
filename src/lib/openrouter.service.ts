@@ -111,7 +111,7 @@ export class OpenRouterService {
       // Aktualizacja użycia
       if (response.usage) {
         this._updateUsage(
-          this._calculateCost(response.usage, requestData.model)
+          this._calculateCost(response.usage)
         );
       }
 
@@ -238,7 +238,7 @@ export class OpenRouterService {
     return this.currentUsage < this.costLimit;
   }
 
-  private _calculateCost(usage: ChatResponse['usage'], model: string): number {
+  private _calculateCost(usage: ChatResponse['usage']): number {
     // Uproszczone obliczenie kosztu - w rzeczywistej implementacji
     // należałoby użyć dokładnych stawek dla danego modelu
     const promptCost = usage.prompt_tokens * 0.00001;
