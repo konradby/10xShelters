@@ -1,5 +1,6 @@
 'use client';
 
+import { logError, logInfo } from '@/lib';
 import { dogsMatchesMock } from '@/mocks/dogs';
 import { AIMatchRequestDTO, AIMatchResponseDTO } from '@/types/types';
 import { DogCardViewModel } from '@/types/viewModels.types';
@@ -11,7 +12,6 @@ import {
   useState,
 } from 'react';
 
-// Definiowanie typów dla kontekstu
 interface AIMatchContextType {
   prompt: string;
   setPrompt: (prompt: string) => void;
@@ -21,17 +21,14 @@ interface AIMatchContextType {
   searchDogs: (searchPrompt: string, limit?: number) => Promise<void>;
 }
 
-// Utworzenie kontekstu
 const AIMatchContext = createContext<AIMatchContextType | null>(null);
 
-// Provider komponent
 export function AIMatchProvider({ children }: { children: ReactNode }) {
   const [prompt, setPrompt] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [results, setResults] = useState<DogCardViewModel[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Inicjalizacja początkowych danych z mocka
   useEffect(() => {
     if (dogsMatchesMock.matches && dogsMatchesMock.matches.length > 0) {
       const dogCards: DogCardViewModel[] = dogsMatchesMock.matches.map(
@@ -50,7 +47,7 @@ export function AIMatchProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const searchDogs = async (searchPrompt: string, limit: number = 12) => {
+  const searchDogs = async (searchPrompt: string, limit: number = 4) => {
     if (searchPrompt.length < 10) {
       setError('Opis musi zawierać co najmniej 10 znaków');
       return;
@@ -65,55 +62,54 @@ export function AIMatchProvider({ children }: { children: ReactNode }) {
     setError(null);
     setResults([]);
 
-    try {
-      console.log('Rozpoczynam wyszukiwanie psów z promptem:', searchPrompt);
-      const response = await fetch('/api/public/match-dogs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: searchPrompt,
-          limit,
-        } as AIMatchRequestDTO),
-      });
+    logInfo('Rozpoczynam wyszukiwanie psów z promptem:', { searchPrompt });
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError('Aby korzystać z wyszukiwania, zaloguj się do systemu');
-          setIsLoading(false);
-          return;
-        }
-
-        throw new Error(`Status ${response.status}`);
-      }
-
-      const data: AIMatchResponseDTO = await response.json();
-      console.log('Otrzymane dane z API:', data);
-
-      if (!data.matches || data.matches.length === 0) {
-        setError('Nie znaleziono psów pasujących do Twoich kryteriów');
-        return;
-      }
-
-      // Przekształcenie odpowiedzi API na model widoku
-      const dogCards: DogCardViewModel[] = data.matches.map((match) => ({
-        id: match.dog.id,
-        name: match.dog.name,
-        breedName: match.dog.breed.name,
-        size: match.dog.breed.size,
-        imageUrl: match.dog.primary_image,
-        matchPercentage: match.match_percentage,
-      }));
-
-      console.log('Przetworzone karty psów:', dogCards);
-      setResults(dogCards);
-    } catch (e) {
+    const response = await fetch('/api/public/match-dogs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: searchPrompt,
+        limit,
+      } as AIMatchRequestDTO),
+    }).catch((error) => {
+      logError('Error searching dogs:', { error });
       setError('Wystąpił błąd podczas wyszukiwania. Spróbuj ponownie później.');
-      console.error('Error searching dogs:', e);
-    } finally {
+    });
+
+    if (!response) {
+      setError('Wystąpił błąd podczas wyszukiwania. Spróbuj ponownie później.');
       setIsLoading(false);
+      return;
     }
+
+    if (response.status === 401) {
+      setError('Aby korzystać z wyszukiwania, zaloguj się do systemu');
+      setIsLoading(false);
+      return;
+    }
+
+    const data: AIMatchResponseDTO = await response.json();
+    logInfo('Otrzymane dane z API:', { data });
+
+    if (!data.matches || data.matches.length === 0) {
+      setError('Nie znaleziono psów pasujących do Twoich kryteriów');
+      return;
+    }
+
+    const dogCards: DogCardViewModel[] = data.matches.map((match) => ({
+      id: match.dog_id,
+      matchPercentage: match.match_percentage,
+      name: match.dog.name,
+      breedName: match.dog.breed.name,
+      size: match.dog.breed.size,
+      imageUrl: match.dog.primary_image,
+    }));
+
+    logInfo('Przetworzone karty psów:', { dogCards });
+    setResults(dogCards);
+    setIsLoading(false);
   };
 
   const contextValue = {
@@ -132,7 +128,6 @@ export function AIMatchProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook do używania kontekstu
 export function useAIMatch(): AIMatchContextType {
   const context = useContext(AIMatchContext);
 

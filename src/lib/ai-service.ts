@@ -50,7 +50,7 @@ export class AIService {
 
     const stringifiedDogs = JSON.stringify(dogsData);
 
-    logInfo('Dogs sent to AI:', stringifiedDogs);
+    logInfo('Dogs sent to AI');
 
     const systemPrompt = `Jesteś ekspertem w dopasowywaniu psów do preferencji użytkowników. Analizujesz opis preferencji i listę dostępnych psów, a następnie zwracasz listę psów najlepiej pasujących do kryteriów. WAŻNE: Twoja odpowiedź MUSI zawierać WYŁĄCZNIE obiekt JSON zgodny z tym schematem: { "matches": [ { "dog_id": "id_psa", "match_percentage": liczba_od_0_do_100, "reasoning": "krótkie_uzasadnienie" } ] }. Nie dodawaj żadnego tekstu przed lub po obiekcie JSON. Ograniczaj długość uzasadnienia do maksymalnie 100 znaków.`;
 
@@ -88,7 +88,6 @@ export class AIService {
     }
 
     const data = (await response.json()) as OpenRouterResponse;
-    logInfo('AI response:', { data });
 
     if (!data.choices?.[0]?.message?.content) {
       logError('Empty AI response:', { data });
@@ -139,8 +138,6 @@ export class AIService {
       logError('Invalid AI response format:', { content });
       return { matches: [] };
     }
-
-    logInfo('AI response content:', { content });
 
     return await this.extractAndParseJson(content);
   }

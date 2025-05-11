@@ -14,7 +14,6 @@ export const AIPromptInput = () => {
   const [validationErrors, setValidationErrors] = useState<string | null>(null);
 
   useEffect(() => {
-    // Ustaw domyślny prompt przy pierwszym renderowaniu
     if (prompt === '') {
       setPrompt(defaultPrompt);
     }
