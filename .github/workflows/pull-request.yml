@@ -46,14 +46,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Run unit tests with coverage
-        run: yarn test:coverage
+      - name: Run unit tests
+        run: yarn test
 
-      - name: Upload coverage report
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: unit-coverage
-          path: coverage/
+          name: test-results
+          path: |
+            coverage/
+            test-results/
 
   e2e-test:
     name: E2E Tests
@@ -124,7 +126,7 @@ jobs:
 
             const comment = `✅ All checks passed successfully!\n\n` +
               `🔍 Linting completed\n` +
-              `🧪 Unit tests passed with coverage\n` +
+              `🧪 Unit tests passed\n` +
               `🌐 E2E tests passed across all browsers\n\n` +
               `Branch: ${pr.head.ref}\n` +
               `Commit: ${pr.head.sha}`;
